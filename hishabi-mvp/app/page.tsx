@@ -28,12 +28,22 @@ export default function Home() {
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("");
 
+  // ── Add form state ──────────────────────────────────────────
   const [sellerId, setSellerId] = useState("");
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [sellerPlan, setSellerPlan] = useState("free");
   const [imageLimit, setImageLimit] = useState(3);
+
+  // ── Edit form state ─────────────────────────────────────────
+  // editingId = which product card is currently open for editing
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editPrice, setEditPrice] = useState("");
+  const [editSubmitting, setEditSubmitting] = useState(false);
+
+  // ── Fetch ────────────────────────────────────────────────────
 
   async function fetchProducts() {
     try {
@@ -85,6 +95,8 @@ export default function Home() {
       setImageLimit(3);
     }
   }
+
+  // ── Image helpers (add form) ─────────────────────────────────
 
   function handleImageChange(event: React.ChangeEvent<HTMLInputElement>) {
     const newFiles = Array.from(event.target.files || []);
@@ -167,6 +179,8 @@ export default function Home() {
       throw new Error("Image upload failed.");
     }
   }
+
+  // ── Add product ──────────────────────────────────────────────
 
   async function handleAddProduct(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -258,6 +272,8 @@ export default function Home() {
     }
   }
 
+  // ── Delete product ───────────────────────────────────────────
+
   async function handleDeleteProduct(productId: string, productName: string) {
     const confirmDelete = window.confirm(
       `Are you sure you want to delete "${productName}"?`
@@ -296,6 +312,91 @@ export default function Home() {
       setMessage("Something went wrong while deleting product.");
     }
   }
+
+  // ── Edit product ─────────────────────────────────────────────
+
+  function openEditForm(product: Product) {
+    // If the same card's edit is already open, close it
+    if (editingId === product.id) {
+      setEditingId(null);
+      return;
+    }
+
+    setEditingId(product.id);
+    setEditName(product.name);
+    setEditPrice(String(product.price));
+    setMessage("");
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setEditName("");
+    setEditPrice("");
+  }
+
+  async function handleEditProduct(
+    event: React.FormEvent<HTMLFormElement>,
+    productId: string
+  ) {
+    event.preventDefault();
+    setMessage("");
+
+    if (!editName.trim()) {
+      setMessage("Product name cannot be empty.");
+      return;
+    }
+
+    if (!editPrice || Number(editPrice) <= 0) {
+      setMessage("Price must be greater than 0.");
+      return;
+    }
+
+    try {
+      setEditSubmitting(true);
+
+      const response = await fetch(`${API_BASE_URL}/products/${productId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: editName.trim(),
+          price: Number(editPrice),
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        if (typeof result.detail === "string") {
+          setMessage(result.detail);
+        } else {
+          setMessage("Failed to update product.");
+        }
+
+        return;
+      }
+
+      // Update the product in local state — no need to re-fetch everything
+      setProducts((currentProducts) =>
+        currentProducts.map((p) =>
+          p.id === productId
+            ? { ...p, name: editName.trim(), price: Number(editPrice) }
+            : p
+        )
+      );
+
+      setMessage(`"${editName.trim()}" updated successfully.`);
+      cancelEdit();
+    } catch (error) {
+      console.error("Failed to update product:", error);
+      setMessage("Something went wrong while updating product.");
+    } finally {
+      setEditSubmitting(false);
+    }
+  }
+
+  // ── Render ────────────────────────────────────────────────────
 
   return (
     <main className="min-h-screen bg-slate-50 px-6 py-8 text-slate-900">
@@ -518,6 +619,7 @@ export default function Home() {
                   key={product.id}
                   className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
                 >
+                  {/* Product image */}
                   <div className="mb-4 flex h-36 items-center justify-center overflow-hidden rounded-xl bg-slate-100">
                     {product.image_url &&
                     product.image_url.startsWith("http") ? (
@@ -533,43 +635,102 @@ export default function Home() {
                     )}
                   </div>
 
-                  <h3 className="text-lg font-bold">{product.name}</h3>
-
-                  <p className="mt-2 text-2xl font-bold">
-                    {product.price} BDT
-                  </p>
-
-                  <div className="mt-4 space-y-2 text-sm text-slate-500">
-                    <p>
-                      <span className="font-medium text-slate-700">
-                        Product ID:
-                      </span>{" "}
-                      {product.id.slice(0, 8)}...
-                    </p>
-
-                    <p>
-                      <span className="font-medium text-slate-700">
-                        Seller ID:
-                      </span>{" "}
-                      {product.seller_id.slice(0, 8)}...
-                    </p>
-                  </div>
-
-                  <div className="mt-5 flex gap-2">
-                    <button className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
-                      Edit
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        handleDeleteProduct(product.id, product.name)
-                      }
-                      className="flex-1 rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-100"
+                  {/* Show either the read-only info OR the edit form */}
+                  {editingId === product.id ? (
+                    // ── Inline edit form ──────────────────────────
+                    <form
+                      onSubmit={(e) => handleEditProduct(e, product.id)}
+                      className="space-y-3"
                     >
-                      Delete
-                    </button>
-                  </div>
+                      <div>
+                        <label className="mb-1 block text-xs font-medium text-slate-600">
+                          Product Name
+                        </label>
+                        <input
+                          value={editName}
+                          onChange={(e) => setEditName(e.target.value)}
+                          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-slate-900"
+                          autoFocus
+                        />
+                      </div>
+
+                      <div>
+                        <label className="mb-1 block text-xs font-medium text-slate-600">
+                          Price (BDT)
+                        </label>
+                        <input
+                          value={editPrice}
+                          onChange={(e) => setEditPrice(e.target.value)}
+                          type="number"
+                          min="1"
+                          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-slate-900"
+                        />
+                      </div>
+
+                      <div className="flex gap-2 pt-1">
+                        <button
+                          type="submit"
+                          disabled={editSubmitting}
+                          className="flex-1 rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          {editSubmitting ? "Saving..." : "Save"}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={cancelEdit}
+                          className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  ) : (
+                    // ── Read-only product info ─────────────────────
+                    <>
+                      <h3 className="text-lg font-bold">{product.name}</h3>
+
+                      <p className="mt-2 text-2xl font-bold">
+                        {product.price} BDT
+                      </p>
+
+                      <div className="mt-4 space-y-2 text-sm text-slate-500">
+                        <p>
+                          <span className="font-medium text-slate-700">
+                            Product ID:
+                          </span>{" "}
+                          {product.id.slice(0, 8)}...
+                        </p>
+
+                        <p>
+                          <span className="font-medium text-slate-700">
+                            Seller ID:
+                          </span>{" "}
+                          {product.seller_id.slice(0, 8)}...
+                        </p>
+                      </div>
+
+                      <div className="mt-5 flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => openEditForm(product)}
+                          className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                        >
+                          Edit
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleDeleteProduct(product.id, product.name)
+                          }
+                          className="flex-1 rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-100"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
               ))}
             </div>
