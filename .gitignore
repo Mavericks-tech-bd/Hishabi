@@ -1,0 +1,19 @@
+# Python backend
+hishabi-backend/venv/
+hishabi-backend/.env
+hishabi-backend/__pycache__/
+hishabi-backend/*.pyc
+
+# Next.js frontend
+hishabi-mvp/node_modules/
+hishabi-mvp/.next/
+hishabi-mvp/.env.local
+hishabi-mvp/.env
+
+# System files
+.DS_Store
+__MACOSX/
+
+# Logs
+*.log
+npm-debug.log*
