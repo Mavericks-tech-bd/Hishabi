@@ -1636,11 +1636,23 @@ export default function HishabiDashboard() {
     }
   }
 
+  function isPlanSellerLoaded() {
+    return (
+      !!sellerPlanData?.seller_id &&
+      sellerPlanData.seller_id === planSellerId.trim()
+    );
+  }
+
   async function handleChangeSellerPlan(newPlan: string) {
     const trimmedSellerId = planSellerId.trim();
 
     if (!trimmedSellerId) {
       setMessage("Please enter a seller ID first.");
+      return;
+    }
+
+    if (!isPlanSellerLoaded()) {
+      setMessage("Please load a valid seller before changing plan.");
       return;
     }
 
@@ -3664,7 +3676,10 @@ export default function HishabiDashboard() {
               <div className="mt-5 flex flex-col gap-3 md:flex-row">
                 <input
                   value={planSellerId}
-                  onChange={(event) => setPlanSellerId(event.target.value)}
+                  onChange={(event) => {
+                    setPlanSellerId(event.target.value);
+                    setSellerPlanData(null);
+                  }}
                   placeholder="Paste seller ID to check or change plan"
                   className="flex-1 rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-900"
                 />
@@ -3773,6 +3788,12 @@ export default function HishabiDashboard() {
                   Change seller plan for MVP/admin testing. No payment will be
                   charged.
                 </p>
+
+                {!isPlanSellerLoaded() && (
+                  <div className="mt-4 rounded-xl bg-yellow-50 p-4 text-sm font-semibold text-yellow-800 ring-1 ring-yellow-100">
+                    Load a valid seller first. Plan buttons are disabled until the seller exists.
+                  </div>
+                )}
               </div>
 
               <div className="grid gap-4 md:grid-cols-3">
@@ -3829,7 +3850,7 @@ export default function HishabiDashboard() {
                       <button
                         type="button"
                         onClick={() => handleChangeSellerPlan(plan.id)}
-                        disabled={planUpdating || !planSellerId.trim()}
+                        disabled={planUpdating || !isPlanSellerLoaded()}
                         className={`mt-5 w-full rounded-xl px-5 py-3 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${
                           isCurrentPlan
                             ? "border border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
