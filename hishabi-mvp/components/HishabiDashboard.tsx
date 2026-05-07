@@ -183,6 +183,7 @@ export default function HishabiDashboard() {
   const [showCustomerForm, setShowCustomerForm] = useState(false);
   const [customerSubmitting, setCustomerSubmitting] = useState(false);
   const [filterCustomerSellerId, setFilterCustomerSellerId] = useState("");
+  const [customerSearchQuery, setCustomerSearchQuery] = useState("");
 
   const [customerSellerId, setCustomerSellerId] = useState("");
   const [customerName, setCustomerName] = useState("");
@@ -1555,6 +1556,31 @@ export default function HishabiDashboard() {
     }
   }
 
+  function getVisibleCustomers() {
+    const searchValue = customerSearchQuery.trim().toLowerCase();
+
+    if (!searchValue) {
+      return customers;
+    }
+
+    return customers.filter((customer) => {
+      const searchableText = [
+        customer.name,
+        customer.phone,
+        customer.whatsapp_number,
+        customer.facebook_id,
+        customer.address,
+        customer.seller_id,
+        customer.id,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return searchableText.includes(searchValue);
+    });
+  }
+
   function getCustomerPhone(customerId: string) {
     return (
       customers.find((customer) => customer.id === customerId)?.phone ||
@@ -2532,6 +2558,41 @@ export default function HishabiDashboard() {
               </div>
             </section>
 
+            <section className="mb-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <h2 className="text-lg font-bold text-slate-900">
+                    Search Customers
+                  </h2>
+
+                  <p className="mt-1 text-sm text-slate-500">
+                    Search by name, phone, WhatsApp, Facebook ID, address, customer ID, or seller ID.
+                  </p>
+                </div>
+
+                <p className="text-sm font-semibold text-slate-600">
+                  Showing {getVisibleCustomers().length} of {customers.length}
+                </p>
+              </div>
+
+              <div className="mt-4 flex flex-col gap-3 md:flex-row">
+                <input
+                  value={customerSearchQuery}
+                  onChange={(event) => setCustomerSearchQuery(event.target.value)}
+                  placeholder="Search customers by name, phone, Facebook, WhatsApp, address..."
+                  className="flex-1 rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-900"
+                />
+
+                <button
+                  type="button"
+                  onClick={() => setCustomerSearchQuery("")}
+                  className="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                >
+                  Clear Search
+                </button>
+              </div>
+            </section>
+
             <section className="rounded-2xl bg-white p-6 shadow-sm">
               <h2 className="mb-5 text-xl font-bold">Customers</h2>
 
@@ -2541,15 +2602,17 @@ export default function HishabiDashboard() {
                 </div>
               )}
 
-              {!customersLoading && customers.length === 0 && (
+              {!customersLoading && getVisibleCustomers().length === 0 && (
                 <div className="rounded-xl bg-slate-50 p-6 text-sm text-slate-500">
-                  No customers found.
+                  {customerSearchQuery.trim()
+                    ? "No customers matched your search."
+                    : "No customers found."}
                 </div>
               )}
 
-              {!customersLoading && customers.length > 0 && (
+              {!customersLoading && getVisibleCustomers().length > 0 && (
                 <div className="grid gap-4 md:grid-cols-2">
-                  {customers.map((customer) => (
+                  {getVisibleCustomers().map((customer) => (
                     <article
                       key={customer.id}
                       className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
