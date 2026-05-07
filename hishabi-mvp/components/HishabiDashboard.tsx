@@ -208,6 +208,8 @@ export default function HishabiDashboard() {
   const [showOrderForm, setShowOrderForm] = useState(false);
   const [orderSubmitting, setOrderSubmitting] = useState(false);
   const [filterOrderSellerId, setFilterOrderSellerId] = useState("");
+  const [orderStatusFilter, setOrderStatusFilter] =
+    useState<OrderStatus | "all">("all");
 
   const [orderSellerId, setOrderSellerId] = useState("");
   const [orderCustomerId, setOrderCustomerId] = useState("");
@@ -1553,6 +1555,62 @@ export default function HishabiDashboard() {
     }
   }
 
+  function getCustomerPhone(customerId: string) {
+    return (
+      customers.find((customer) => customer.id === customerId)?.phone ||
+      orderAvailableCustomers.find((customer) => customer.id === customerId)
+        ?.phone ||
+      editOrderAvailableCustomers.find((customer) => customer.id === customerId)
+        ?.phone ||
+      "Not added"
+    );
+  }
+
+  function getProductPrice(productId: string) {
+    const product =
+      products.find((currentProduct) => currentProduct.id === productId) ||
+      orderAvailableProducts.find(
+        (currentProduct) => currentProduct.id === productId
+      ) ||
+      editOrderAvailableProducts.find(
+        (currentProduct) => currentProduct.id === productId
+      );
+
+    return product?.price ?? null;
+  }
+
+  function getStatusBadgeClass(status: OrderStatus) {
+    if (status === "pending") {
+      return "bg-yellow-50 text-yellow-700 ring-yellow-200";
+    }
+
+    if (status === "confirmed") {
+      return "bg-blue-50 text-blue-700 ring-blue-200";
+    }
+
+    if (status === "shipped") {
+      return "bg-purple-50 text-purple-700 ring-purple-200";
+    }
+
+    if (status === "delivered") {
+      return "bg-green-50 text-green-700 ring-green-200";
+    }
+
+    if (status === "cancelled") {
+      return "bg-red-50 text-red-700 ring-red-200";
+    }
+
+    return "bg-slate-50 text-slate-700 ring-slate-200";
+  }
+
+  function getVisibleOrders() {
+    if (orderStatusFilter === "all") {
+      return orders;
+    }
+
+    return orders.filter((order) => order.status === orderStatusFilter);
+  }
+
   function getCustomerName(customerId: string) {
     return (
       customers.find((customer) => customer.id === customerId)?.name ||
@@ -2842,6 +2900,22 @@ export default function HishabiDashboard() {
                 >
                   Show All
                 </button>
+
+                <select
+                  value={orderStatusFilter}
+                  onChange={(event) =>
+                    setOrderStatusFilter(event.target.value as OrderStatus | "all")
+                  }
+                  className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 outline-none transition focus:border-slate-900"
+                  aria-label="Filter by status"
+                >
+                  <option value="all">All statuses</option>
+                  {ORDER_STATUSES.map((status) => (
+                    <option key={status} value={status}>
+                      {status}
+                    </option>
+                  ))}
+                </select>
               </div>
             </section>
 
@@ -2988,15 +3062,15 @@ export default function HishabiDashboard() {
                 </div>
               )}
 
-              {!ordersLoading && orders.length === 0 && (
+              {!ordersLoading && getVisibleOrders().length === 0 && (
                 <div className="rounded-xl bg-slate-50 p-6 text-sm text-slate-500">
                   No orders found.
                 </div>
               )}
 
-              {!ordersLoading && orders.length > 0 && (
+              {!ordersLoading && getVisibleOrders().length > 0 && (
                 <div className="space-y-4">
-                  {orders.map((order) => (
+                  {getVisibleOrders().map((order) => (
                     <article
                       key={order.id}
                       className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
@@ -3163,9 +3237,19 @@ export default function HishabiDashboard() {
                         <>
                           <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                             <div>
-                              <h3 className="text-lg font-bold text-slate-900">
-                                Order #{shortId(order.id)}
-                              </h3>
+                              <div className="flex flex-wrap items-center gap-3">
+                                <h3 className="text-lg font-bold text-slate-900">
+                                  Order #{shortId(order.id)}
+                                </h3>
+
+                                <span
+                                  className={`rounded-full px-3 py-1 text-xs font-bold capitalize ring-1 ${getStatusBadgeClass(
+                                    order.status
+                                  )}`}
+                                >
+                                  {order.status}
+                                </span>
+                              </div>
 
                               <div className="mt-2 space-y-2 text-sm text-slate-600">
                                 <div className="flex flex-wrap items-center gap-2">
@@ -3195,6 +3279,10 @@ export default function HishabiDashboard() {
                                   )}
                                 </div>
 
+                                <p className="text-sm text-slate-500">
+                                  Customer phone: {getCustomerPhone(order.customer_id)}
+                                </p>
+
                                 <div className="flex flex-wrap items-center gap-2">
                                   <span>Product:</span>
                                   <span className="font-semibold">
@@ -3205,6 +3293,10 @@ export default function HishabiDashboard() {
                                     "Product ID"
                                   )}
                                 </div>
+
+                                <p className="text-sm text-slate-500">
+                                  Product price: {formatTaka(getProductPrice(order.product_id))}
+                                </p>
 
                                 <p>Quantity: {order.quantity}</p>
 
