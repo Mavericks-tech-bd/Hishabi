@@ -1030,6 +1030,22 @@ def get_dashboard_summary(seller_id: str | None = None):
         ]
     )
 
+    confirmed_orders = len(
+        [
+            order
+            for order in orders
+            if order.get("status") == "confirmed"
+        ]
+    )
+
+    shipped_orders = len(
+        [
+            order
+            for order in orders
+            if order.get("status") == "shipped"
+        ]
+    )
+
     delivered_orders = len(
         [
             order
@@ -1038,13 +1054,30 @@ def get_dashboard_summary(seller_id: str | None = None):
         ]
     )
 
+    cancelled_orders = len(
+        [
+            order
+            for order in orders
+            if order.get("status") == "cancelled"
+        ]
+    )
+
+    average_order_value = 0
+
+    if len(orders) > 0:
+        average_order_value = total_sales / len(orders)
+
     return {
         "data": {
             "total_products": len(products),
             "total_customers": len(customers),
             "total_orders": len(orders),
             "total_sales": total_sales,
+            "average_order_value": average_order_value,
             "pending_orders": pending_orders,
+            "confirmed_orders": confirmed_orders,
+            "shipped_orders": shipped_orders,
             "delivered_orders": delivered_orders,
+            "cancelled_orders": cancelled_orders,
         }
     }

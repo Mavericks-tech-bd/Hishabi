@@ -68,8 +68,12 @@ type DashboardSummary = {
   total_customers: number;
   total_orders: number;
   total_sales: number;
+  average_order_value: number;
   pending_orders: number;
+  confirmed_orders: number;
+  shipped_orders: number;
   delivered_orders: number;
+  cancelled_orders: number;
 };
 
 type ActiveSection =
@@ -2101,48 +2105,80 @@ export default function HishabiDashboard() {
             )}
 
             {!dashboardLoading && dashboardSummary && (
-              <section className="grid gap-4 md:grid-cols-3">
-                <div className="rounded-2xl bg-white p-5 shadow-sm">
-                  <p className="text-sm text-slate-500">Total Products</p>
-                  <h2 className="mt-2 text-3xl font-bold">
-                    {dashboardSummary.total_products}
-                  </h2>
-                </div>
+              <section className="space-y-6">
+                <section className="grid gap-4 md:grid-cols-4">
+                  <div className="rounded-2xl bg-white p-5 shadow-sm">
+                    <p className="text-sm text-slate-500">Total Products</p>
+                    <h2 className="mt-2 text-3xl font-bold">
+                      {dashboardSummary.total_products}
+                    </h2>
+                  </div>
 
-                <div className="rounded-2xl bg-white p-5 shadow-sm">
-                  <p className="text-sm text-slate-500">Total Customers</p>
-                  <h2 className="mt-2 text-3xl font-bold">
-                    {dashboardSummary.total_customers}
-                  </h2>
-                </div>
+                  <div className="rounded-2xl bg-white p-5 shadow-sm">
+                    <p className="text-sm text-slate-500">Total Customers</p>
+                    <h2 className="mt-2 text-3xl font-bold">
+                      {dashboardSummary.total_customers}
+                    </h2>
+                  </div>
 
-                <div className="rounded-2xl bg-white p-5 shadow-sm">
-                  <p className="text-sm text-slate-500">Total Orders</p>
-                  <h2 className="mt-2 text-3xl font-bold">
-                    {dashboardSummary.total_orders}
-                  </h2>
-                </div>
+                  <div className="rounded-2xl bg-white p-5 shadow-sm">
+                    <p className="text-sm text-slate-500">Total Orders</p>
+                    <h2 className="mt-2 text-3xl font-bold">
+                      {dashboardSummary.total_orders}
+                    </h2>
+                  </div>
 
-                <div className="rounded-2xl bg-white p-5 shadow-sm">
-                  <p className="text-sm text-slate-500">Total Sales</p>
-                  <h2 className="mt-2 text-3xl font-bold">
-                    {dashboardSummary.total_sales} BDT
-                  </h2>
-                </div>
+                  <div className="rounded-2xl bg-white p-5 shadow-sm">
+                    <p className="text-sm text-slate-500">Total Sales</p>
+                    <h2 className="mt-2 text-3xl font-bold">
+                      {formatTaka(dashboardSummary.total_sales)}
+                    </h2>
+                  </div>
+                </section>
 
-                <div className="rounded-2xl bg-white p-5 shadow-sm">
-                  <p className="text-sm text-slate-500">Pending Orders</p>
-                  <h2 className="mt-2 text-3xl font-bold">
-                    {dashboardSummary.pending_orders}
-                  </h2>
-                </div>
+                <section className="grid gap-4 md:grid-cols-3">
+                  <div className="rounded-2xl bg-white p-5 shadow-sm">
+                    <p className="text-sm text-slate-500">Average Order Value</p>
+                    <h2 className="mt-2 text-3xl font-bold">
+                      {formatTaka(dashboardSummary.average_order_value)}
+                    </h2>
+                  </div>
 
-                <div className="rounded-2xl bg-white p-5 shadow-sm">
-                  <p className="text-sm text-slate-500">Delivered Orders</p>
-                  <h2 className="mt-2 text-3xl font-bold">
-                    {dashboardSummary.delivered_orders}
-                  </h2>
-                </div>
+                  <div className="rounded-2xl bg-yellow-50 p-5 shadow-sm ring-1 ring-yellow-100">
+                    <p className="text-sm text-yellow-700">Pending Orders</p>
+                    <h2 className="mt-2 text-3xl font-bold text-yellow-800">
+                      {dashboardSummary.pending_orders}
+                    </h2>
+                  </div>
+
+                  <div className="rounded-2xl bg-blue-50 p-5 shadow-sm ring-1 ring-blue-100">
+                    <p className="text-sm text-blue-700">Confirmed Orders</p>
+                    <h2 className="mt-2 text-3xl font-bold text-blue-800">
+                      {dashboardSummary.confirmed_orders}
+                    </h2>
+                  </div>
+
+                  <div className="rounded-2xl bg-purple-50 p-5 shadow-sm ring-1 ring-purple-100">
+                    <p className="text-sm text-purple-700">Shipped Orders</p>
+                    <h2 className="mt-2 text-3xl font-bold text-purple-800">
+                      {dashboardSummary.shipped_orders}
+                    </h2>
+                  </div>
+
+                  <div className="rounded-2xl bg-green-50 p-5 shadow-sm ring-1 ring-green-100">
+                    <p className="text-sm text-green-700">Delivered Orders</p>
+                    <h2 className="mt-2 text-3xl font-bold text-green-800">
+                      {dashboardSummary.delivered_orders}
+                    </h2>
+                  </div>
+
+                  <div className="rounded-2xl bg-red-50 p-5 shadow-sm ring-1 ring-red-100">
+                    <p className="text-sm text-red-700">Cancelled Orders</p>
+                    <h2 className="mt-2 text-3xl font-bold text-red-800">
+                      {dashboardSummary.cancelled_orders}
+                    </h2>
+                  </div>
+                </section>
               </section>
             )}
           </>
