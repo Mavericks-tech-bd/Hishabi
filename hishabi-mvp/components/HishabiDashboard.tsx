@@ -314,9 +314,16 @@ export default function HishabiDashboard() {
       const response = await fetch(url);
       const result = await safeJson(response);
 
+      if (!response.ok) {
+        setProducts([]);
+        setMessage(result?.detail || "Could not load products from backend.");
+        return;
+      }
+
       setProducts(result?.data || []);
     } catch (error) {
       console.error("Failed to fetch products:", error);
+      setProducts([]);
       setMessage("Could not load products from backend.");
     } finally {
       setProductsLoading(false);
@@ -337,9 +344,16 @@ export default function HishabiDashboard() {
       const response = await fetch(url);
       const result = await safeJson(response);
 
+      if (!response.ok) {
+        setCustomers([]);
+        setMessage(result?.detail || "Could not load customers from backend.");
+        return;
+      }
+
       setCustomers(result?.data || []);
     } catch (error) {
       console.error("Failed to fetch customers:", error);
+      setCustomers([]);
       setMessage("Could not load customers from backend.");
     } finally {
       setCustomersLoading(false);
@@ -360,9 +374,16 @@ export default function HishabiDashboard() {
       const response = await fetch(url);
       const result = await safeJson(response);
 
+      if (!response.ok) {
+        setOrders([]);
+        setMessage(result?.detail || "Could not load orders from backend.");
+        return;
+      }
+
       setOrders(result?.data || []);
     } catch (error) {
       console.error("Failed to fetch orders:", error);
+      setOrders([]);
       setMessage("Could not load orders from backend.");
     } finally {
       setOrdersLoading(false);
@@ -467,6 +488,11 @@ export default function HishabiDashboard() {
   async function fetchOrderOptionsForSeller(currentSellerId = orderSellerId) {
     const trimmedSellerId = currentSellerId.trim();
 
+    setOrderAvailableCustomers([]);
+    setOrderAvailableProducts([]);
+    setOrderCustomerId("");
+    setOrderProductId("");
+
     if (!trimmedSellerId) {
       setMessage("Please enter a seller ID first.");
       return;
@@ -522,6 +548,9 @@ export default function HishabiDashboard() {
 
   async function fetchEditOrderOptionsForSeller(currentSellerId: string) {
     const trimmedSellerId = currentSellerId.trim();
+
+    setEditOrderAvailableCustomers([]);
+    setEditOrderAvailableProducts([]);
 
     if (!trimmedSellerId) {
       setMessage("Seller ID missing for this order.");
@@ -612,6 +641,18 @@ export default function HishabiDashboard() {
       setGlobalSellerLoading(true);
       setMessage("");
 
+      const sellerExists = await validateSellerExistsForFrontend(selectedSellerId);
+
+      if (!sellerExists) {
+        setActiveGlobalSellerId("");
+        setOrderAvailableCustomers([]);
+        setOrderAvailableProducts([]);
+        setOrderCustomerId("");
+        setOrderProductId("");
+        setMessage("Seller not found. Please load a valid seller first.");
+        return;
+      }
+
       setActiveGlobalSellerId(selectedSellerId);
 
       setFilterSellerId(selectedSellerId);
@@ -645,6 +686,25 @@ export default function HishabiDashboard() {
     }
   }
 
+  async function validateSellerExistsForFrontend(currentSellerId: string) {
+    const trimmedSellerId = currentSellerId.trim();
+
+    if (!trimmedSellerId) {
+      return false;
+    }
+
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/sellers/${encodeURIComponent(trimmedSellerId)}/plan`
+      );
+
+      return response.ok;
+    } catch (error) {
+      console.error("Failed to validate seller:", error);
+      return false;
+    }
+  }
+
   async function applyGlobalSellerId() {
     const trimmedSellerId = globalSellerId.trim();
 
@@ -656,6 +716,18 @@ export default function HishabiDashboard() {
     try {
       setGlobalSellerLoading(true);
       setMessage("");
+
+      const sellerExists = await validateSellerExistsForFrontend(trimmedSellerId);
+
+      if (!sellerExists) {
+        setActiveGlobalSellerId("");
+        setOrderAvailableCustomers([]);
+        setOrderAvailableProducts([]);
+        setOrderCustomerId("");
+        setOrderProductId("");
+        setMessage("Seller not found. Please check the seller ID.");
+        return;
+      }
 
       setActiveGlobalSellerId(trimmedSellerId);
 
@@ -3054,6 +3126,7 @@ export default function HishabiDashboard() {
                   type="button"
                   onClick={() => {
                     setFilterOrderSellerId("");
+                    setOrderStatusFilter("all");
                     fetchOrders("");
                   }}
                   className="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
