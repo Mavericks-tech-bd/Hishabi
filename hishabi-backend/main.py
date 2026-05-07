@@ -401,6 +401,7 @@ def get_products(seller_id: str | None = None):
     cleaned_seller_id = clean_text(seller_id)
 
     if cleaned_seller_id:
+        get_seller_or_404(cleaned_seller_id)
         query = query.eq("seller_id", cleaned_seller_id)
 
     response = query.execute()
@@ -723,6 +724,7 @@ def get_customers(seller_id: str | None = None):
     cleaned_seller_id = clean_text(seller_id)
 
     if cleaned_seller_id:
+        get_seller_or_404(cleaned_seller_id)
         query = query.eq("seller_id", cleaned_seller_id)
 
     response = query.execute()
@@ -831,6 +833,7 @@ def get_orders(seller_id: str | None = None):
     cleaned_seller_id = clean_text(seller_id)
 
     if cleaned_seller_id:
+        get_seller_or_404(cleaned_seller_id)
         query = query.eq("seller_id", cleaned_seller_id)
 
     response = query.execute()
@@ -1004,6 +1007,7 @@ def get_dashboard_summary(seller_id: str | None = None):
     cleaned_seller_id = clean_text(seller_id)
 
     if cleaned_seller_id:
+        get_seller_or_404(cleaned_seller_id)
         products_query = products_query.eq("seller_id", cleaned_seller_id)
         customers_query = customers_query.eq("seller_id", cleaned_seller_id)
         orders_query = orders_query.eq("seller_id", cleaned_seller_id)
