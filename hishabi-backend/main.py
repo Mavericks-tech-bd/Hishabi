@@ -1,33 +1,16 @@
-# FastAPI দিয়ে API বানানো হচ্ছে
 from fastapi import FastAPI, HTTPException, UploadFile, File
-
-# Frontend থেকে backend API call করার permission দেওয়ার জন্য CORS middleware
 from fastapi.middleware.cors import CORSMiddleware
-
-# Request body validate করার জন্য
 from pydantic import BaseModel
-
-# .env file থেকে Supabase keys load করার জন্য
 from dotenv import load_dotenv
-
-# Supabase database connect করার জন্য
 from supabase import create_client
-
-# Environment variables read করার জন্য
 import os
 import uuid
 
 
-# .env file load
 load_dotenv()
 
-
-# FastAPI app create
 app = FastAPI(title="Hishabi API")
 
-
-# CORS setup
-# এটা frontend থেকে backend API call করার permission দেয়
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -39,8 +22,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-# Supabase client create
 supabase = create_client(
     os.getenv("SUPABASE_URL"),
     os.getenv("SUPABASE_SERVICE_ROLE_KEY"),
@@ -48,8 +29,22 @@ supabase = create_client(
 
 
 # ==========================================================
+# Constants
+# ==========================================================
+
+ALLOWED_ORDER_STATUSES = [
+    "pending",
+    "confirmed",
+    "shipped",
+    "delivered",
+    "cancelled",
+]
+
+ALLOWED_PLANS = ["free", "starter", "max"]
+
+
+# ==========================================================
 # Models
-# এগুলো define করে কোন API request body-তে কী কী data লাগবে
 # ==========================================================
 
 class ProductCreate(BaseModel):
@@ -98,23 +93,202 @@ class OrderUpdate(BaseModel):
 
 
 class SellerPlanUpdate(BaseModel):
-    # seller plan update করার জন্য
-    # allowed values: free, starter, max
     plan: str
 
 
-def get_product_image_limit(plan: str):
-    """
-    Seller plan অনুযায়ী প্রতি product-এ কয়টা image upload করা যাবে।
+# ==========================================================
+# Helper Functions
+# ==========================================================
 
-    free = 3 images per product
-    starter = 10 images per product
-    max = 10 images per product
-    """
+def clean_text(value: str | None) -> str:
+    if value is None:
+        return ""
+    return value.strip()
+
+
+def clean_optional_text(value: str | None) -> str | None:
+    cleaned_value = clean_text(value)
+    return cleaned_value or None
+
+
+def validate_required_id(value: str | None, field_name: str) -> str:
+    cleaned_value = clean_text(value)
+
+    if not cleaned_value:
+        raise HTTPException(
+            status_code=400,
+            detail=f"{field_name} is required.",
+        )
+
+    return cleaned_value
+
+
+def validate_required_text(value: str | None, field_name: str) -> str:
+    cleaned_value = clean_text(value)
+
+    if not cleaned_value:
+        raise HTTPException(
+            status_code=400,
+            detail=f"{field_name} is required.",
+        )
+
+    return cleaned_value
+
+
+def validate_price(price: float | None) -> float:
+    if price is None:
+        raise HTTPException(
+            status_code=400,
+            detail="Product price is required.",
+        )
+
+    if price <= 0:
+        raise HTTPException(
+            status_code=400,
+            detail="Product price must be greater than 0.",
+        )
+
+    return price
+
+
+def validate_quantity(quantity: int | None) -> int:
+    if quantity is None:
+        raise HTTPException(
+            status_code=400,
+            detail="Order quantity is required.",
+        )
+
+    if quantity <= 0:
+        raise HTTPException(
+            status_code=400,
+            detail="Order quantity must be greater than 0.",
+        )
+
+    return quantity
+
+
+def validate_order_status(status: str | None) -> str:
+    cleaned_status = clean_text(status)
+
+    if not cleaned_status:
+        raise HTTPException(
+            status_code=400,
+            detail="Order status is required.",
+        )
+
+    if cleaned_status not in ALLOWED_ORDER_STATUSES:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Invalid order status. Allowed statuses are: "
+                "pending, confirmed, shipped, delivered, cancelled."
+            ),
+        )
+
+    return cleaned_status
+
+
+def get_product_image_limit(plan: str):
     if plan == "free":
         return 3
 
     return 10
+
+
+def get_seller_or_404(seller_id: str):
+    cleaned_seller_id = validate_required_id(seller_id, "Seller ID")
+
+    response = (
+        supabase
+        .table("sellers")
+        .select("*")
+        .eq("id", cleaned_seller_id)
+        .execute()
+    )
+
+    if not response.data:
+        raise HTTPException(
+            status_code=404,
+            detail="Seller not found. Please check the seller ID.",
+        )
+
+    return response.data[0]
+
+
+def get_product_or_404(product_id: str):
+    cleaned_product_id = validate_required_id(product_id, "Product ID")
+
+    response = (
+        supabase
+        .table("products")
+        .select("*")
+        .eq("id", cleaned_product_id)
+        .execute()
+    )
+
+    if not response.data:
+        raise HTTPException(
+            status_code=404,
+            detail="Product not found. Please check the product ID.",
+        )
+
+    return response.data[0]
+
+
+def get_customer_or_404(customer_id: str):
+    cleaned_customer_id = validate_required_id(customer_id, "Customer ID")
+
+    response = (
+        supabase
+        .table("customers")
+        .select("*")
+        .eq("id", cleaned_customer_id)
+        .execute()
+    )
+
+    if not response.data:
+        raise HTTPException(
+            status_code=404,
+            detail="Customer not found. Please check the customer ID.",
+        )
+
+    return response.data[0]
+
+
+def get_order_or_404(order_id: str):
+    cleaned_order_id = validate_required_id(order_id, "Order ID")
+
+    response = (
+        supabase
+        .table("orders")
+        .select("*")
+        .eq("id", cleaned_order_id)
+        .execute()
+    )
+
+    if not response.data:
+        raise HTTPException(
+            status_code=404,
+            detail="Order not found. Please check the order ID.",
+        )
+
+    return response.data[0]
+
+
+def validate_customer_belongs_to_seller(customer, seller_id: str):
+    if customer.get("seller_id") != seller_id:
+        raise HTTPException(
+            status_code=400,
+            detail="Customer does not belong to this seller.",
+        )
+
+
+def validate_product_belongs_to_seller(product, seller_id: str):
+    if product.get("seller_id") != seller_id:
+        raise HTTPException(
+            status_code=400,
+            detail="Product does not belong to this seller.",
+        )
 
 
 # ==========================================================
@@ -134,31 +308,14 @@ def test_db():
 
 # ==========================================================
 # Seller Plan Routes
-# Seller কোন package ব্যবহার করছে সেটা check/update করার জন্য
 # ==========================================================
 
 @app.get("/sellers/{seller_id}/plan")
 def get_seller_plan(seller_id: str):
-    """
-    Seller ID দিলে seller-এর current plan, product limit,
-    current product count, আর remaining products দেখাবে.
-    """
+    seller = get_seller_or_404(seller_id)
 
-    # 1. Seller info বের করি
-    seller_response = (
-        supabase
-        .table("sellers")
-        .select("id, name, phone, plan, product_limit")
-        .eq("id", seller_id)
-        .execute()
-    )
+    seller_id = seller["id"]
 
-    if not seller_response.data:
-        raise HTTPException(status_code=404, detail="Seller not found")
-
-    seller = seller_response.data[0]
-
-    # 2. এই seller-এর কয়টা product আছে সেটা count করি
     products_response = (
         supabase
         .table("products")
@@ -167,18 +324,15 @@ def get_seller_plan(seller_id: str):
         .execute()
     )
 
-    current_product_count = len(products_response.data)
+    current_product_count = len(products_response.data or [])
 
-    # 3. Plan এবং limit বের করি
     plan = seller.get("plan") or "free"
     product_limit = seller.get("product_limit")
 
-    # 4. Max plan হলে unlimited দেখাবো
     if plan == "max":
         product_limit_display = "unlimited"
         remaining_products = "unlimited"
     else:
-        # free হলে 10, starter হলে 50 fallback রাখছি
         if product_limit is None:
             product_limit = 50 if plan == "starter" else 10
 
@@ -200,53 +354,33 @@ def get_seller_plan(seller_id: str):
 
 @app.put("/sellers/{seller_id}/plan")
 def update_seller_plan(seller_id: str, plan_update: SellerPlanUpdate):
-    """
-    Seller-এর plan update করার route.
+    selected_plan = clean_text(plan_update.plan)
 
-    Plans:
-    - free = 10 products
-    - starter = 50 products
-    - max = unlimited products
-    """
-
-    selected_plan = plan_update.plan
-
-    # 1. Valid plan কিনা check করি
-    if selected_plan not in ["free", "starter", "max"]:
+    if selected_plan not in ALLOWED_PLANS:
         raise HTTPException(
             status_code=400,
-            detail="Invalid plan. Allowed plans are: free, starter, max",
+            detail="Invalid plan. Allowed plans are: free, starter, max.",
         )
 
-    # 2. Plan অনুযায়ী product limit set করি
+    seller = get_seller_or_404(seller_id)
+
     if selected_plan == "free":
         product_limit = 10
     elif selected_plan == "starter":
         product_limit = 50
     else:
-        product_limit = None  # max plan = unlimited
+        product_limit = None
 
-    # 3. Seller আছে কিনা check করি
-    seller_response = (
-        supabase
-        .table("sellers")
-        .select("id")
-        .eq("id", seller_id)
-        .execute()
-    )
-
-    if not seller_response.data:
-        raise HTTPException(status_code=404, detail="Seller not found")
-
-    # 4. Seller plan update করি
     response = (
         supabase
         .table("sellers")
-        .update({
-            "plan": selected_plan,
-            "product_limit": product_limit,
-        })
-        .eq("id", seller_id)
+        .update(
+            {
+                "plan": selected_plan,
+                "product_limit": product_limit,
+            }
+        )
+        .eq("id", seller["id"])
         .execute()
     )
 
@@ -262,49 +396,33 @@ def update_seller_plan(seller_id: str, plan_update: SellerPlanUpdate):
 
 @app.get("/products")
 def get_products(seller_id: str | None = None):
-    """
-    Products list দেখাবে.
-
-    seller_id দিলে শুধু ওই seller-এর products দেখাবে।
-    seller_id না দিলে আগের মতো সব products দেখাবে।
-    """
-
     query = supabase.table("products").select("*")
 
-    if seller_id:
-        query = query.eq("seller_id", seller_id)
+    cleaned_seller_id = clean_text(seller_id)
+
+    if cleaned_seller_id:
+        query = query.eq("seller_id", cleaned_seller_id)
 
     response = query.execute()
+
     return {"data": response.data}
 
 
 @app.get("/products/{product_id}")
 def get_product_detail(product_id: str):
-    response = (
-        supabase
-        .table("products")
-        .select("*")
-        .eq("id", product_id)
-        .execute()
-    )
-
-    if not response.data:
-        raise HTTPException(status_code=404, detail="Product not found")
-
-    return {"data": response.data[0]}
+    product = get_product_or_404(product_id)
+    return {"data": product}
 
 
 @app.get("/products/{product_id}/images")
 def get_product_images(product_id: str):
-    """
-    Specific product-এর সব uploaded images দেখাবে।
-    """
+    product = get_product_or_404(product_id)
 
     response = (
         supabase
         .table("product_images")
         .select("*")
-        .eq("product_id", product_id)
+        .eq("product_id", product["id"])
         .execute()
     )
 
@@ -316,59 +434,31 @@ async def upload_product_images(
     product_id: str,
     files: list[UploadFile] = File(...),
 ):
-    """
-    Product image upload করার route.
+    product = get_product_or_404(product_id)
 
-    Rules:
-    - free seller: max 3 images per product
-    - starter seller: max 10 images per product
-    - max seller: max 10 images per product
-    """
-
-    # 1. Product আছে কিনা check করি
-    product_response = (
-        supabase
-        .table("products")
-        .select("*")
-        .eq("id", product_id)
-        .execute()
-    )
-
-    if not product_response.data:
-        raise HTTPException(status_code=404, detail="Product not found")
-
-    product = product_response.data[0]
     seller_id = product["seller_id"]
+    seller = get_seller_or_404(seller_id)
 
-    # 2. Seller-এর plan বের করি
-    seller_response = (
-        supabase
-        .table("sellers")
-        .select("id, plan")
-        .eq("id", seller_id)
-        .execute()
-    )
-
-    if not seller_response.data:
-        raise HTTPException(status_code=404, detail="Seller not found")
-
-    seller = seller_response.data[0]
     plan = seller.get("plan") or "free"
     image_limit = get_product_image_limit(plan)
 
-    # 3. এই product-এর already কয়টা image আছে count করি
+    if not files:
+        raise HTTPException(
+            status_code=400,
+            detail="Please upload at least one image file.",
+        )
+
     existing_images_response = (
         supabase
         .table("product_images")
         .select("id")
-        .eq("product_id", product_id)
+        .eq("product_id", product["id"])
         .execute()
     )
 
-    current_image_count = len(existing_images_response.data)
+    current_image_count = len(existing_images_response.data or [])
     new_image_count = len(files)
 
-    # 4. Limit cross করলে block করি
     if current_image_count + new_image_count > image_limit:
         raise HTTPException(
             status_code=403,
@@ -390,17 +480,16 @@ async def upload_product_images(
 
     uploaded_images = []
 
-    # 5. প্রতিটা image Supabase Storage-এ upload করি
     for file in files:
         if not file.content_type or not file.content_type.startswith("image/"):
             raise HTTPException(
                 status_code=400,
-                detail="Only image files are allowed",
+                detail="Only image files are allowed.",
             )
 
         file_extension = file.filename.split(".")[-1] if file.filename else "jpg"
         unique_file_name = f"{uuid.uuid4()}.{file_extension}"
-        storage_path = f"{seller_id}/{product_id}/{unique_file_name}"
+        storage_path = f"{seller_id}/{product['id']}/{unique_file_name}"
 
         file_bytes = await file.read()
 
@@ -419,26 +508,29 @@ async def upload_product_images(
         image_response = (
             supabase
             .table("product_images")
-            .insert({
-                "product_id": product_id,
-                "seller_id": seller_id,
-                "image_url": public_url,
-                "storage_path": storage_path,
-            })
+            .insert(
+                {
+                    "product_id": product["id"],
+                    "seller_id": seller_id,
+                    "image_url": public_url,
+                    "storage_path": storage_path,
+                }
+            )
             .execute()
         )
 
         uploaded_images.extend(image_response.data)
 
-    # 6. products.image_url empty হলে first uploaded image main image হিসেবে set করি
     if uploaded_images and not product.get("image_url"):
         (
             supabase
             .table("products")
-            .update({
-                "image_url": uploaded_images[0]["image_url"],
-            })
-            .eq("id", product_id)
+            .update(
+                {
+                    "image_url": uploaded_images[0]["image_url"],
+                }
+            )
+            .eq("id", product["id"])
             .execute()
         )
 
@@ -450,33 +542,35 @@ async def upload_product_images(
 
 @app.delete("/product-images/{image_id}")
 def delete_product_image(image_id: str):
-    """
-    Product image delete করার route.
-    Storage থেকেও delete করবে, database থেকেও delete করবে।
-    """
+    cleaned_image_id = validate_required_id(image_id, "Image ID")
 
     image_response = (
         supabase
         .table("product_images")
         .select("*")
-        .eq("id", image_id)
+        .eq("id", cleaned_image_id)
         .execute()
     )
 
     if not image_response.data:
-        raise HTTPException(status_code=404, detail="Image not found")
+        raise HTTPException(
+            status_code=404,
+            detail="Image not found. Please check the image ID.",
+        )
 
     image = image_response.data[0]
 
-    supabase.storage.from_("product-images").remove([
-        image["storage_path"],
-    ])
+    supabase.storage.from_("product-images").remove(
+        [
+            image["storage_path"],
+        ]
+    )
 
     response = (
         supabase
         .table("product_images")
         .delete()
-        .eq("id", image_id)
+        .eq("id", cleaned_image_id)
         .execute()
     )
 
@@ -485,66 +579,48 @@ def delete_product_image(image_id: str):
 
 @app.post("/products")
 def create_product(product: ProductCreate):
-    """
-    Product create করার route.
+    seller_id = validate_required_id(product.seller_id, "Seller ID")
+    product_name = validate_required_text(product.name, "Product name")
+    product_price = validate_price(product.price)
 
-    Plan logic:
-    - free plan = 10 products
-    - starter plan = 50 products
-    - max plan = unlimited products
-    """
+    seller = get_seller_or_404(seller_id)
 
-    # 1. Seller আছে কিনা এবং seller-এর plan/product_limit কত সেটা বের করি
-    seller_response = (
-        supabase
-        .table("sellers")
-        .select("id, plan, product_limit")
-        .eq("id", product.seller_id)
-        .execute()
-    )
-
-    if not seller_response.data:
-        raise HTTPException(status_code=404, detail="Seller not found")
-
-    seller = seller_response.data[0]
     current_plan = seller.get("plan") or "free"
     product_limit = seller.get("product_limit")
 
-    # 2. এই seller-এর এখন কয়টা product আছে সেটা count করি
     products_response = (
         supabase
         .table("products")
         .select("id")
-        .eq("seller_id", product.seller_id)
+        .eq("seller_id", seller_id)
         .execute()
     )
 
-    current_product_count = len(products_response.data)
+    current_product_count = len(products_response.data or [])
 
-    # 3. Max plan হলে কোনো product limit থাকবে না
     if current_plan == "max":
         response = (
             supabase
             .table("products")
-            .insert({
-                "seller_id": product.seller_id,
-                "name": product.name,
-                "price": product.price,
-                "image_url": product.image_url,
-            })
+            .insert(
+                {
+                    "seller_id": seller_id,
+                    "name": product_name,
+                    "price": product_price,
+                    "image_url": product.image_url,
+                }
+            )
             .execute()
         )
 
         return {"data": response.data}
 
-    # 4. Free/starter plan-এর জন্য limit set করি
     if product_limit is None:
         if current_plan == "starter":
             product_limit = 50
         else:
             product_limit = 10
 
-    # 5. Limit পূর্ণ হলে product create block করব
     if current_product_count >= product_limit:
         if current_plan == "free":
             upgrade_message = (
@@ -569,16 +645,17 @@ def create_product(product: ProductCreate):
             },
         )
 
-    # 6. Limit-এর নিচে থাকলে product create হবে
     response = (
         supabase
         .table("products")
-        .insert({
-            "seller_id": product.seller_id,
-            "name": product.name,
-            "price": product.price,
-            "image_url": product.image_url,
-        })
+        .insert(
+            {
+                "seller_id": seller_id,
+                "name": product_name,
+                "price": product_price,
+                "image_url": product.image_url,
+            }
+        )
         .execute()
     )
 
@@ -587,22 +664,33 @@ def create_product(product: ProductCreate):
 
 @app.put("/products/{product_id}")
 def update_product(product_id: str, product: ProductUpdate):
+    existing_product = get_product_or_404(product_id)
+
     update_data = {}
 
     if product.name is not None:
-        update_data["name"] = product.name
+        update_data["name"] = validate_required_text(
+            product.name,
+            "Product name",
+        )
 
     if product.price is not None:
-        update_data["price"] = product.price
+        update_data["price"] = validate_price(product.price)
 
     if product.image_url is not None:
-        update_data["image_url"] = product.image_url
+        update_data["image_url"] = clean_optional_text(product.image_url)
+
+    if not update_data:
+        raise HTTPException(
+            status_code=400,
+            detail="No product fields were provided for update.",
+        )
 
     response = (
         supabase
         .table("products")
         .update(update_data)
-        .eq("id", product_id)
+        .eq("id", existing_product["id"])
         .execute()
     )
 
@@ -611,11 +699,13 @@ def update_product(product_id: str, product: ProductUpdate):
 
 @app.delete("/products/{product_id}")
 def delete_product(product_id: str):
+    product = get_product_or_404(product_id)
+
     response = (
         supabase
         .table("products")
         .delete()
-        .eq("id", product_id)
+        .eq("id", product["id"])
         .execute()
     )
 
@@ -628,51 +718,44 @@ def delete_product(product_id: str):
 
 @app.get("/customers")
 def get_customers(seller_id: str | None = None):
-    """
-    Customers list দেখাবে.
-
-    seller_id দিলে শুধু ওই seller-এর customers দেখাবে।
-    seller_id না দিলে আগের মতো সব customers দেখাবে।
-    """
-
     query = supabase.table("customers").select("*")
 
-    if seller_id:
-        query = query.eq("seller_id", seller_id)
+    cleaned_seller_id = clean_text(seller_id)
+
+    if cleaned_seller_id:
+        query = query.eq("seller_id", cleaned_seller_id)
 
     response = query.execute()
+
     return {"data": response.data}
 
 
 @app.get("/customers/{customer_id}")
 def get_customer_detail(customer_id: str):
-    response = (
-        supabase
-        .table("customers")
-        .select("*")
-        .eq("id", customer_id)
-        .execute()
-    )
-
-    if not response.data:
-        raise HTTPException(status_code=404, detail="Customer not found")
-
-    return {"data": response.data[0]}
+    customer = get_customer_or_404(customer_id)
+    return {"data": customer}
 
 
 @app.post("/customers")
 def create_customer(customer: CustomerCreate):
+    seller_id = validate_required_id(customer.seller_id, "Seller ID")
+    customer_name = validate_required_text(customer.name, "Customer name")
+
+    get_seller_or_404(seller_id)
+
     response = (
         supabase
         .table("customers")
-        .insert({
-            "seller_id": customer.seller_id,
-            "name": customer.name,
-            "phone": customer.phone,
-            "address": customer.address,
-            "facebook_id": customer.facebook_id,
-            "whatsapp_number": customer.whatsapp_number,
-        })
+        .insert(
+            {
+                "seller_id": seller_id,
+                "name": customer_name,
+                "phone": clean_optional_text(customer.phone),
+                "address": clean_optional_text(customer.address),
+                "facebook_id": clean_optional_text(customer.facebook_id),
+                "whatsapp_number": clean_optional_text(customer.whatsapp_number),
+            }
+        )
         .execute()
     )
 
@@ -681,28 +764,41 @@ def create_customer(customer: CustomerCreate):
 
 @app.put("/customers/{customer_id}")
 def update_customer(customer_id: str, customer: CustomerUpdate):
+    existing_customer = get_customer_or_404(customer_id)
+
     update_data = {}
 
     if customer.name is not None:
-        update_data["name"] = customer.name
+        update_data["name"] = validate_required_text(
+            customer.name,
+            "Customer name",
+        )
 
     if customer.phone is not None:
-        update_data["phone"] = customer.phone
+        update_data["phone"] = clean_optional_text(customer.phone)
 
     if customer.address is not None:
-        update_data["address"] = customer.address
+        update_data["address"] = clean_optional_text(customer.address)
 
     if customer.facebook_id is not None:
-        update_data["facebook_id"] = customer.facebook_id
+        update_data["facebook_id"] = clean_optional_text(customer.facebook_id)
 
     if customer.whatsapp_number is not None:
-        update_data["whatsapp_number"] = customer.whatsapp_number
+        update_data["whatsapp_number"] = clean_optional_text(
+            customer.whatsapp_number
+        )
+
+    if not update_data:
+        raise HTTPException(
+            status_code=400,
+            detail="No customer fields were provided for update.",
+        )
 
     response = (
         supabase
         .table("customers")
         .update(update_data)
-        .eq("id", customer_id)
+        .eq("id", existing_customer["id"])
         .execute()
     )
 
@@ -711,11 +807,13 @@ def update_customer(customer_id: str, customer: CustomerUpdate):
 
 @app.delete("/customers/{customer_id}")
 def delete_customer(customer_id: str):
+    customer = get_customer_or_404(customer_id)
+
     response = (
         supabase
         .table("customers")
         .delete()
-        .eq("id", customer_id)
+        .eq("id", customer["id"])
         .execute()
     )
 
@@ -728,36 +826,21 @@ def delete_customer(customer_id: str):
 
 @app.get("/orders")
 def get_orders(seller_id: str | None = None):
-    """
-    Orders list দেখাবে.
-
-    seller_id দিলে শুধু ওই seller-এর orders দেখাবে।
-    seller_id না দিলে আগের মতো সব orders দেখাবে।
-    """
-
     query = supabase.table("orders").select("*")
 
-    if seller_id:
-        query = query.eq("seller_id", seller_id)
+    cleaned_seller_id = clean_text(seller_id)
+
+    if cleaned_seller_id:
+        query = query.eq("seller_id", cleaned_seller_id)
 
     response = query.execute()
+
     return {"data": response.data}
 
 
 @app.get("/orders/{order_id}")
 def get_order_detail(order_id: str):
-    order_response = (
-        supabase
-        .table("orders")
-        .select("*")
-        .eq("id", order_id)
-        .execute()
-    )
-
-    if not order_response.data:
-        raise HTTPException(status_code=404, detail="Order not found")
-
-    order = order_response.data[0]
+    order = get_order_or_404(order_id)
 
     customer_response = (
         supabase
@@ -789,7 +872,7 @@ def get_order_detail(order_id: str):
             "status": order["status"],
             "quantity": order["quantity"],
             "total": order["total"],
-            "created_at": order["created_at"],
+            "created_at": order.get("created_at"),
             "customer": customer_response.data[0] if customer_response.data else None,
             "product": product_response.data[0] if product_response.data else None,
             "seller": seller_response.data[0] if seller_response.data else None,
@@ -799,32 +882,36 @@ def get_order_detail(order_id: str):
 
 @app.post("/orders")
 def create_order(order: OrderCreate):
-    product_response = (
-        supabase
-        .table("products")
-        .select("*")
-        .eq("id", order.product_id)
-        .execute()
-    )
+    seller_id = validate_required_id(order.seller_id, "Seller ID")
+    customer_id = validate_required_id(order.customer_id, "Customer ID")
+    product_id = validate_required_id(order.product_id, "Product ID")
+    quantity = validate_quantity(order.quantity)
+    status = validate_order_status(order.status)
 
-    if not product_response.data:
-        raise HTTPException(status_code=404, detail="Product not found")
+    get_seller_or_404(seller_id)
 
-    product = product_response.data[0]
+    customer = get_customer_or_404(customer_id)
+    product = get_product_or_404(product_id)
+
+    validate_customer_belongs_to_seller(customer, seller_id)
+    validate_product_belongs_to_seller(product, seller_id)
+
     product_price = float(product["price"])
-    total = product_price * order.quantity
+    total = product_price * quantity
 
     response = (
         supabase
         .table("orders")
-        .insert({
-            "seller_id": order.seller_id,
-            "customer_id": order.customer_id,
-            "product_id": order.product_id,
-            "quantity": order.quantity,
-            "total": total,
-            "status": order.status,
-        })
+        .insert(
+            {
+                "seller_id": seller_id,
+                "customer_id": customer_id,
+                "product_id": product_id,
+                "quantity": quantity,
+                "total": total,
+                "status": status,
+            }
+        )
         .execute()
     )
 
@@ -833,67 +920,56 @@ def create_order(order: OrderCreate):
 
 @app.put("/orders/{order_id}")
 def update_order(order_id: str, order: OrderUpdate):
+    existing_order = get_order_or_404(order_id)
+
+    seller_id = existing_order["seller_id"]
     update_data = {}
 
     if order.customer_id is not None:
-        update_data["customer_id"] = order.customer_id
+        customer_id = validate_required_id(order.customer_id, "Customer ID")
+        customer = get_customer_or_404(customer_id)
+        validate_customer_belongs_to_seller(customer, seller_id)
+        update_data["customer_id"] = customer_id
 
     if order.product_id is not None:
-        update_data["product_id"] = order.product_id
+        product_id = validate_required_id(order.product_id, "Product ID")
+        product = get_product_or_404(product_id)
+        validate_product_belongs_to_seller(product, seller_id)
+        update_data["product_id"] = product_id
 
     if order.quantity is not None:
-        update_data["quantity"] = order.quantity
+        update_data["quantity"] = validate_quantity(order.quantity)
 
     if order.status is not None:
-        update_data["status"] = order.status
+        update_data["status"] = validate_order_status(order.status)
 
-    # product বা quantity change হলে total আবার calculate হবে
+    if not update_data:
+        raise HTTPException(
+            status_code=400,
+            detail="No order fields were provided for update.",
+        )
+
     if order.product_id is not None or order.quantity is not None:
-        existing_order_response = (
-            supabase
-            .table("orders")
-            .select("*")
-            .eq("id", order_id)
-            .execute()
+        product_id_for_total = update_data.get(
+            "product_id",
+            existing_order["product_id"],
+        )
+        quantity_for_total = update_data.get(
+            "quantity",
+            existing_order["quantity"],
         )
 
-        if not existing_order_response.data:
-            raise HTTPException(status_code=404, detail="Order not found")
+        product_for_total = get_product_or_404(product_id_for_total)
+        validate_product_belongs_to_seller(product_for_total, seller_id)
 
-        existing_order = existing_order_response.data[0]
-
-        product_id = (
-            order.product_id
-            if order.product_id is not None
-            else existing_order["product_id"]
-        )
-
-        quantity = (
-            order.quantity
-            if order.quantity is not None
-            else existing_order["quantity"]
-        )
-
-        product_response = (
-            supabase
-            .table("products")
-            .select("*")
-            .eq("id", product_id)
-            .execute()
-        )
-
-        if not product_response.data:
-            raise HTTPException(status_code=404, detail="Product not found")
-
-        product = product_response.data[0]
-        product_price = float(product["price"])
-        update_data["total"] = product_price * quantity
+        product_price = float(product_for_total["price"])
+        update_data["total"] = product_price * quantity_for_total
 
     response = (
         supabase
         .table("orders")
         .update(update_data)
-        .eq("id", order_id)
+        .eq("id", existing_order["id"])
         .execute()
     )
 
@@ -902,15 +978,18 @@ def update_order(order_id: str, order: OrderUpdate):
 
 @app.delete("/orders/{order_id}")
 def delete_order(order_id: str):
+    order = get_order_or_404(order_id)
+
     response = (
         supabase
         .table("orders")
         .delete()
-        .eq("id", order_id)
+        .eq("id", order["id"])
         .execute()
     )
 
     return {"data": response.data}
+
 
 # ==========================================================
 # Dashboard Summary
@@ -918,21 +997,16 @@ def delete_order(order_id: str):
 
 @app.get("/dashboard/summary")
 def get_dashboard_summary(seller_id: str | None = None):
-    """
-    Simple dashboard summary.
-
-    seller_id দিলে শুধু ওই seller-এর summary দেখাবে।
-    seller_id না দিলে for now সব data-এর summary দেখাবে।
-    """
-
     products_query = supabase.table("products").select("id")
     customers_query = supabase.table("customers").select("id")
     orders_query = supabase.table("orders").select("id, total, status")
 
-    if seller_id:
-        products_query = products_query.eq("seller_id", seller_id)
-        customers_query = customers_query.eq("seller_id", seller_id)
-        orders_query = orders_query.eq("seller_id", seller_id)
+    cleaned_seller_id = clean_text(seller_id)
+
+    if cleaned_seller_id:
+        products_query = products_query.eq("seller_id", cleaned_seller_id)
+        customers_query = customers_query.eq("seller_id", cleaned_seller_id)
+        orders_query = orders_query.eq("seller_id", cleaned_seller_id)
 
     products_response = products_query.execute()
     customers_response = customers_query.execute()
@@ -948,15 +1022,21 @@ def get_dashboard_summary(seller_id: str | None = None):
         order_total = order.get("total") or 0
         total_sales += float(order_total)
 
-    pending_orders = len([
-        order for order in orders
-        if order.get("status") == "pending"
-    ])
+    pending_orders = len(
+        [
+            order
+            for order in orders
+            if order.get("status") == "pending"
+        ]
+    )
 
-    delivered_orders = len([
-        order for order in orders
-        if order.get("status") == "delivered"
-    ])
+    delivered_orders = len(
+        [
+            order
+            for order in orders
+            if order.get("status") == "delivered"
+        ]
+    )
 
     return {
         "data": {
