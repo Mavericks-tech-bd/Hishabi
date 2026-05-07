@@ -278,6 +278,49 @@ export default function HishabiDashboard() {
     }
   }
 
+  function getApiErrorMessage(result: any, fallbackMessage: string) {
+    if (!result) {
+      return fallbackMessage;
+    }
+
+    if (typeof result.detail === "string") {
+      return result.detail;
+    }
+
+    if (typeof result.message === "string") {
+      return result.message;
+    }
+
+    if (result.detail?.message) {
+      return result.detail.message;
+    }
+
+    if (result.detail?.upgrade_message) {
+      return result.detail.upgrade_message;
+    }
+
+    if (Array.isArray(result.detail) && result.detail.length > 0) {
+      const firstError = result.detail[0];
+      const fieldName = Array.isArray(firstError?.loc)
+        ? firstError.loc.filter((item: string) => item !== "body").join(".")
+        : "field";
+
+      return `${fieldName}: ${firstError?.msg || fallbackMessage}`;
+    }
+
+    if (Array.isArray(result.field_errors) && result.field_errors.length > 0) {
+      const firstError = result.field_errors[0];
+      return `${firstError.field}: ${firstError.message}`;
+    }
+
+    return fallbackMessage;
+  }
+
+  function isValidPositiveNumber(value: string) {
+    const numericValue = Number(value);
+    return Number.isFinite(numericValue) && numericValue > 0;
+  }
+
   async function copyText(text: string, label: string) {
     try {
       await navigator.clipboard.writeText(text);
@@ -316,7 +359,7 @@ export default function HishabiDashboard() {
 
       if (!response.ok) {
         setProducts([]);
-        setMessage(result?.detail || "Could not load products from backend.");
+        setMessage(getApiErrorMessage(result, "Could not load products from backend."));
         return;
       }
 
@@ -346,7 +389,7 @@ export default function HishabiDashboard() {
 
       if (!response.ok) {
         setCustomers([]);
-        setMessage(result?.detail || "Could not load customers from backend.");
+        setMessage(getApiErrorMessage(result, "Could not load customers from backend."));
         return;
       }
 
@@ -376,7 +419,7 @@ export default function HishabiDashboard() {
 
       if (!response.ok) {
         setOrders([]);
-        setMessage(result?.detail || "Could not load orders from backend.");
+        setMessage(getApiErrorMessage(result, "Could not load orders from backend."));
         return;
       }
 
@@ -407,7 +450,7 @@ export default function HishabiDashboard() {
 
       if (!response.ok) {
         setDashboardSummary(null);
-        setMessage(result?.detail || "Failed to load dashboard summary.");
+        setMessage(getApiErrorMessage(result, "Failed to load dashboard summary."));
         return;
       }
 
@@ -472,7 +515,7 @@ export default function HishabiDashboard() {
 
       if (!response.ok) {
         setSellerPlanData(null);
-        setMessage(result?.detail || "Failed to load seller plan.");
+        setMessage(getApiErrorMessage(result, "Failed to load seller plan."));
         return;
       }
 
@@ -612,7 +655,7 @@ export default function HishabiDashboard() {
 
       if (!response.ok) {
         setSellerHelperData(null);
-        setMessage(result?.detail || "Failed to load seller information.");
+        setMessage(getApiErrorMessage(result, "Failed to load seller information."));
         return;
       }
 
@@ -946,6 +989,11 @@ export default function HishabiDashboard() {
       return;
     }
 
+    if (!isValidPositiveNumber(productPrice)) {
+      setMessage("Product price must be a valid number greater than 0.");
+      return;
+    }
+
     if (selectedImages.length > imageLimit) {
       setMessage(
         `Your ${sellerPlan} plan allows ${imageLimit} images per product. Please remove extra images.`
@@ -1052,7 +1100,7 @@ export default function HishabiDashboard() {
       const result = await safeJson(response);
 
       if (!response.ok) {
-        setMessage(result?.detail || "Failed to delete product.");
+        setMessage(getApiErrorMessage(result, "Failed to delete product."));
         return;
       }
 
@@ -1098,8 +1146,8 @@ export default function HishabiDashboard() {
       return;
     }
 
-    if (!editProductPrice || Number(editProductPrice) <= 0) {
-      setMessage("Price must be greater than 0.");
+    if (!editProductPrice || !isValidPositiveNumber(editProductPrice)) {
+      setMessage("Price must be a valid number greater than 0.");
       return;
     }
 
@@ -1120,7 +1168,7 @@ export default function HishabiDashboard() {
       const result = await safeJson(response);
 
       if (!response.ok) {
-        setMessage(result?.detail || "Failed to update product.");
+        setMessage(getApiErrorMessage(result, "Failed to update product."));
         return;
       }
 
@@ -1186,7 +1234,7 @@ export default function HishabiDashboard() {
       const result = await safeJson(response);
 
       if (!response.ok) {
-        setMessage(result?.detail || "Failed to create customer.");
+        setMessage(getApiErrorMessage(result, "Failed to create customer."));
         return;
       }
 
@@ -1232,7 +1280,7 @@ export default function HishabiDashboard() {
       const result = await safeJson(response);
 
       if (!response.ok) {
-        setMessage(result?.detail || "Failed to delete customer.");
+        setMessage(getApiErrorMessage(result, "Failed to delete customer."));
         return;
       }
 
@@ -1304,7 +1352,7 @@ export default function HishabiDashboard() {
       const result = await safeJson(response);
 
       if (!response.ok) {
-        setMessage(result?.detail || "Failed to update customer.");
+        setMessage(getApiErrorMessage(result, "Failed to update customer."));
         return;
       }
 
@@ -1355,8 +1403,8 @@ export default function HishabiDashboard() {
       return;
     }
 
-    if (!orderQuantity || Number(orderQuantity) <= 0) {
-      setMessage("Quantity must be greater than 0.");
+    if (!orderQuantity || !isValidPositiveNumber(orderQuantity)) {
+      setMessage("Quantity must be a valid number greater than 0.");
       return;
     }
 
@@ -1380,7 +1428,7 @@ export default function HishabiDashboard() {
       const result = await safeJson(response);
 
       if (!response.ok) {
-        setMessage(result?.detail || "Failed to create order.");
+        setMessage(getApiErrorMessage(result, "Failed to create order."));
         return;
       }
 
@@ -1417,7 +1465,7 @@ export default function HishabiDashboard() {
       const result = await safeJson(response);
 
       if (!response.ok) {
-        setMessage(result?.detail || "Failed to delete order.");
+        setMessage(getApiErrorMessage(result, "Failed to delete order."));
         return;
       }
 
@@ -1477,8 +1525,8 @@ export default function HishabiDashboard() {
       return;
     }
 
-    if (!editOrderQuantity || Number(editOrderQuantity) <= 0) {
-      setMessage("Quantity must be greater than 0.");
+    if (!editOrderQuantity || !isValidPositiveNumber(editOrderQuantity)) {
+      setMessage("Quantity must be a valid number greater than 0.");
       return;
     }
 
@@ -1501,7 +1549,7 @@ export default function HishabiDashboard() {
       const result = await safeJson(response);
 
       if (!response.ok) {
-        setMessage(result?.detail || "Failed to update order.");
+        setMessage(getApiErrorMessage(result, "Failed to update order."));
         return;
       }
 
@@ -1539,7 +1587,7 @@ export default function HishabiDashboard() {
       const result = await safeJson(response);
 
       if (!response.ok) {
-        setMessage(result?.detail || "Failed to update order status.");
+        setMessage(getApiErrorMessage(result, "Failed to update order status."));
         return;
       }
 
@@ -1575,7 +1623,7 @@ export default function HishabiDashboard() {
       const result = await safeJson(response);
 
       if (!response.ok) {
-        setMessage(result?.detail || "Failed to load order detail.");
+        setMessage(getApiErrorMessage(result, "Failed to load order detail."));
         return;
       }
 
@@ -1616,7 +1664,7 @@ export default function HishabiDashboard() {
       const result = await safeJson(response);
 
       if (!response.ok) {
-        setMessage(result?.detail || "Failed to update seller plan.");
+        setMessage(getApiErrorMessage(result, "Failed to update seller plan."));
         return;
       }
 
