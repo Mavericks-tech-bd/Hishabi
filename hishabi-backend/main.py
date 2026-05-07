@@ -25,20 +25,17 @@ load_dotenv()
 # FastAPI app create
 app = FastAPI(title="Hishabi API")
 
+
 # CORS setup
 # এটা frontend থেকে backend API call করার permission দেয়
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",
-        "http://127.0.0.1:3000"
+        "http://127.0.0.1:3000",
     ],
     allow_credentials=True,
-    allow_methods=["GET",
-        "POST",
-        "PUT",
-        "DELETE",
-        "OPTIONS"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -46,7 +43,7 @@ app.add_middleware(
 # Supabase client create
 supabase = create_client(
     os.getenv("SUPABASE_URL"),
-    os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+    os.getenv("SUPABASE_SERVICE_ROLE_KEY"),
 )
 
 
@@ -104,6 +101,8 @@ class SellerPlanUpdate(BaseModel):
     # seller plan update করার জন্য
     # allowed values: free, starter, max
     plan: str
+
+
 def get_product_image_limit(plan: str):
     """
     Seller plan অনুযায়ী প্রতি product-এ কয়টা image upload করা যাবে।
@@ -146,9 +145,13 @@ def get_seller_plan(seller_id: str):
     """
 
     # 1. Seller info বের করি
-    seller_response = supabase.table("sellers").select(
-        "id, name, phone, plan, product_limit"
-    ).eq("id", seller_id).execute()
+    seller_response = (
+        supabase
+        .table("sellers")
+        .select("id, name, phone, plan, product_limit")
+        .eq("id", seller_id)
+        .execute()
+    )
 
     if not seller_response.data:
         raise HTTPException(status_code=404, detail="Seller not found")
@@ -156,9 +159,13 @@ def get_seller_plan(seller_id: str):
     seller = seller_response.data[0]
 
     # 2. এই seller-এর কয়টা product আছে সেটা count করি
-    products_response = supabase.table("products").select(
-        "id"
-    ).eq("seller_id", seller_id).execute()
+    products_response = (
+        supabase
+        .table("products")
+        .select("id")
+        .eq("seller_id", seller_id)
+        .execute()
+    )
 
     current_product_count = len(products_response.data)
 
@@ -186,7 +193,7 @@ def get_seller_plan(seller_id: str):
             "plan": plan,
             "product_limit": product_limit_display,
             "current_product_count": current_product_count,
-            "remaining_products": remaining_products
+            "remaining_products": remaining_products,
         }
     }
 
@@ -208,7 +215,7 @@ def update_seller_plan(seller_id: str, plan_update: SellerPlanUpdate):
     if selected_plan not in ["free", "starter", "max"]:
         raise HTTPException(
             status_code=400,
-            detail="Invalid plan. Allowed plans are: free, starter, max"
+            detail="Invalid plan. Allowed plans are: free, starter, max",
         )
 
     # 2. Plan অনুযায়ী product limit set করি
@@ -220,22 +227,32 @@ def update_seller_plan(seller_id: str, plan_update: SellerPlanUpdate):
         product_limit = None  # max plan = unlimited
 
     # 3. Seller আছে কিনা check করি
-    seller_response = supabase.table("sellers").select(
-        "id"
-    ).eq("id", seller_id).execute()
+    seller_response = (
+        supabase
+        .table("sellers")
+        .select("id")
+        .eq("id", seller_id)
+        .execute()
+    )
 
     if not seller_response.data:
         raise HTTPException(status_code=404, detail="Seller not found")
 
     # 4. Seller plan update করি
-    response = supabase.table("sellers").update({
-        "plan": selected_plan,
-        "product_limit": product_limit
-    }).eq("id", seller_id).execute()
+    response = (
+        supabase
+        .table("sellers")
+        .update({
+            "plan": selected_plan,
+            "product_limit": product_limit,
+        })
+        .eq("id", seller_id)
+        .execute()
+    )
 
     return {
         "message": "Seller plan updated successfully",
-        "data": response.data
+        "data": response.data,
     }
 
 
@@ -244,28 +261,52 @@ def update_seller_plan(seller_id: str, plan_update: SellerPlanUpdate):
 # ==========================================================
 
 @app.get("/products")
-def get_products():
-    response = supabase.table("products").select("*").execute()
+def get_products(seller_id: str | None = None):
+    """
+    Products list দেখাবে.
+
+    seller_id দিলে শুধু ওই seller-এর products দেখাবে।
+    seller_id না দিলে আগের মতো সব products দেখাবে।
+    """
+
+    query = supabase.table("products").select("*")
+
+    if seller_id:
+        query = query.eq("seller_id", seller_id)
+
+    response = query.execute()
     return {"data": response.data}
 
 
 @app.get("/products/{product_id}")
 def get_product_detail(product_id: str):
-    response = supabase.table("products").select("*").eq("id", product_id).execute()
+    response = (
+        supabase
+        .table("products")
+        .select("*")
+        .eq("id", product_id)
+        .execute()
+    )
 
     if not response.data:
         raise HTTPException(status_code=404, detail="Product not found")
 
     return {"data": response.data[0]}
+
+
 @app.get("/products/{product_id}/images")
 def get_product_images(product_id: str):
     """
     Specific product-এর সব uploaded images দেখাবে।
     """
 
-    response = supabase.table("product_images").select("*").eq(
-        "product_id", product_id
-    ).execute()
+    response = (
+        supabase
+        .table("product_images")
+        .select("*")
+        .eq("product_id", product_id)
+        .execute()
+    )
 
     return {"data": response.data}
 
@@ -273,7 +314,7 @@ def get_product_images(product_id: str):
 @app.post("/products/{product_id}/images")
 async def upload_product_images(
     product_id: str,
-    files: list[UploadFile] = File(...)
+    files: list[UploadFile] = File(...),
 ):
     """
     Product image upload করার route.
@@ -285,9 +326,13 @@ async def upload_product_images(
     """
 
     # 1. Product আছে কিনা check করি
-    product_response = supabase.table("products").select("*").eq(
-        "id", product_id
-    ).execute()
+    product_response = (
+        supabase
+        .table("products")
+        .select("*")
+        .eq("id", product_id)
+        .execute()
+    )
 
     if not product_response.data:
         raise HTTPException(status_code=404, detail="Product not found")
@@ -296,42 +341,52 @@ async def upload_product_images(
     seller_id = product["seller_id"]
 
     # 2. Seller-এর plan বের করি
-    seller_response = supabase.table("sellers").select(
-        "id, plan"
-    ).eq("id", seller_id).execute()
+    seller_response = (
+        supabase
+        .table("sellers")
+        .select("id, plan")
+        .eq("id", seller_id)
+        .execute()
+    )
 
     if not seller_response.data:
         raise HTTPException(status_code=404, detail="Seller not found")
 
     seller = seller_response.data[0]
     plan = seller.get("plan") or "free"
-
     image_limit = get_product_image_limit(plan)
 
     # 3. এই product-এর already কয়টা image আছে count করি
-    existing_images_response = supabase.table("product_images").select(
-        "id"
-    ).eq("product_id", product_id).execute()
+    existing_images_response = (
+        supabase
+        .table("product_images")
+        .select("id")
+        .eq("product_id", product_id)
+        .execute()
+    )
 
     current_image_count = len(existing_images_response.data)
     new_image_count = len(files)
 
     # 4. Limit cross করলে block করি
     if current_image_count + new_image_count > image_limit:
-     raise HTTPException(
-        status_code=403,
-        detail={
-            "message": f"You cannot upload more than {image_limit} images for one product according to your plan.",
-            "upgrade_message": (
-                "Free plan allows 3 images per product. "
-                "Starter and Max plans allow 10 images per product."
-            ),
-            "current_image_count": current_image_count,
-            "trying_to_upload": new_image_count,
-            "image_limit": image_limit,
-            "current_plan": plan
-        }
-    )
+        raise HTTPException(
+            status_code=403,
+            detail={
+                "message": (
+                    f"You cannot upload more than {image_limit} images "
+                    "for one product according to your plan."
+                ),
+                "upgrade_message": (
+                    "Free plan allows 3 images per product. "
+                    "Starter and Max plans allow 10 images per product."
+                ),
+                "current_image_count": current_image_count,
+                "trying_to_upload": new_image_count,
+                "image_limit": image_limit,
+                "current_plan": plan,
+            },
+        )
 
     uploaded_images = []
 
@@ -340,7 +395,7 @@ async def upload_product_images(
         if not file.content_type or not file.content_type.startswith("image/"):
             raise HTTPException(
                 status_code=400,
-                detail="Only image files are allowed"
+                detail="Only image files are allowed",
             )
 
         file_extension = file.filename.split(".")[-1] if file.filename else "jpg"
@@ -353,32 +408,43 @@ async def upload_product_images(
             storage_path,
             file_bytes,
             {
-                "content-type": file.content_type
-            }
+                "content-type": file.content_type,
+            },
         )
 
         public_url = supabase.storage.from_("product-images").get_public_url(
             storage_path
         )
 
-        image_response = supabase.table("product_images").insert({
-            "product_id": product_id,
-            "seller_id": seller_id,
-            "image_url": public_url,
-            "storage_path": storage_path
-        }).execute()
+        image_response = (
+            supabase
+            .table("product_images")
+            .insert({
+                "product_id": product_id,
+                "seller_id": seller_id,
+                "image_url": public_url,
+                "storage_path": storage_path,
+            })
+            .execute()
+        )
 
         uploaded_images.extend(image_response.data)
 
     # 6. products.image_url empty হলে first uploaded image main image হিসেবে set করি
     if uploaded_images and not product.get("image_url"):
-        supabase.table("products").update({
-            "image_url": uploaded_images[0]["image_url"]
-        }).eq("id", product_id).execute()
+        (
+            supabase
+            .table("products")
+            .update({
+                "image_url": uploaded_images[0]["image_url"],
+            })
+            .eq("id", product_id)
+            .execute()
+        )
 
     return {
         "message": "Images uploaded successfully",
-        "data": uploaded_images
+        "data": uploaded_images,
     }
 
 
@@ -389,9 +455,13 @@ def delete_product_image(image_id: str):
     Storage থেকেও delete করবে, database থেকেও delete করবে।
     """
 
-    image_response = supabase.table("product_images").select("*").eq(
-        "id", image_id
-    ).execute()
+    image_response = (
+        supabase
+        .table("product_images")
+        .select("*")
+        .eq("id", image_id)
+        .execute()
+    )
 
     if not image_response.data:
         raise HTTPException(status_code=404, detail="Image not found")
@@ -399,12 +469,16 @@ def delete_product_image(image_id: str):
     image = image_response.data[0]
 
     supabase.storage.from_("product-images").remove([
-        image["storage_path"]
+        image["storage_path"],
     ])
 
-    response = supabase.table("product_images").delete().eq(
-        "id", image_id
-    ).execute()
+    response = (
+        supabase
+        .table("product_images")
+        .delete()
+        .eq("id", image_id)
+        .execute()
+    )
 
     return {"data": response.data}
 
@@ -421,9 +495,13 @@ def create_product(product: ProductCreate):
     """
 
     # 1. Seller আছে কিনা এবং seller-এর plan/product_limit কত সেটা বের করি
-    seller_response = supabase.table("sellers").select(
-        "id, plan, product_limit"
-    ).eq("id", product.seller_id).execute()
+    seller_response = (
+        supabase
+        .table("sellers")
+        .select("id, plan, product_limit")
+        .eq("id", product.seller_id)
+        .execute()
+    )
 
     if not seller_response.data:
         raise HTTPException(status_code=404, detail="Seller not found")
@@ -433,20 +511,29 @@ def create_product(product: ProductCreate):
     product_limit = seller.get("product_limit")
 
     # 2. এই seller-এর এখন কয়টা product আছে সেটা count করি
-    products_response = supabase.table("products").select(
-        "id"
-    ).eq("seller_id", product.seller_id).execute()
+    products_response = (
+        supabase
+        .table("products")
+        .select("id")
+        .eq("seller_id", product.seller_id)
+        .execute()
+    )
 
     current_product_count = len(products_response.data)
 
     # 3. Max plan হলে কোনো product limit থাকবে না
     if current_plan == "max":
-        response = supabase.table("products").insert({
-            "seller_id": product.seller_id,
-            "name": product.name,
-            "price": product.price,
-            "image_url": product.image_url
-        }).execute()
+        response = (
+            supabase
+            .table("products")
+            .insert({
+                "seller_id": product.seller_id,
+                "name": product.name,
+                "price": product.price,
+                "image_url": product.image_url,
+            })
+            .execute()
+        )
 
         return {"data": response.data}
 
@@ -460,9 +547,14 @@ def create_product(product: ProductCreate):
     # 5. Limit পূর্ণ হলে product create block করব
     if current_product_count >= product_limit:
         if current_plan == "free":
-            upgrade_message = "Upgrade to the 99 taka Starter package to add up to 50 products, or choose the 500 taka Max package for unlimited products."
+            upgrade_message = (
+                "Upgrade to the 99 taka Starter package to add up to 50 products, "
+                "or choose the 500 taka Max package for unlimited products."
+            )
         elif current_plan == "starter":
-            upgrade_message = "Upgrade to the 500 taka Max package to add unlimited products."
+            upgrade_message = (
+                "Upgrade to the 500 taka Max package to add unlimited products."
+            )
         else:
             upgrade_message = "Upgrade your plan to add more products."
 
@@ -473,17 +565,22 @@ def create_product(product: ProductCreate):
                 "upgrade_message": upgrade_message,
                 "current_product_count": current_product_count,
                 "product_limit": product_limit,
-                "current_plan": current_plan
-            }
+                "current_plan": current_plan,
+            },
         )
 
     # 6. Limit-এর নিচে থাকলে product create হবে
-    response = supabase.table("products").insert({
-        "seller_id": product.seller_id,
-        "name": product.name,
-        "price": product.price,
-        "image_url": product.image_url
-    }).execute()
+    response = (
+        supabase
+        .table("products")
+        .insert({
+            "seller_id": product.seller_id,
+            "name": product.name,
+            "price": product.price,
+            "image_url": product.image_url,
+        })
+        .execute()
+    )
 
     return {"data": response.data}
 
@@ -501,14 +598,27 @@ def update_product(product_id: str, product: ProductUpdate):
     if product.image_url is not None:
         update_data["image_url"] = product.image_url
 
-    response = supabase.table("products").update(update_data).eq("id", product_id).execute()
+    response = (
+        supabase
+        .table("products")
+        .update(update_data)
+        .eq("id", product_id)
+        .execute()
+    )
 
     return {"data": response.data}
 
 
 @app.delete("/products/{product_id}")
 def delete_product(product_id: str):
-    response = supabase.table("products").delete().eq("id", product_id).execute()
+    response = (
+        supabase
+        .table("products")
+        .delete()
+        .eq("id", product_id)
+        .execute()
+    )
+
     return {"data": response.data}
 
 
@@ -517,14 +627,32 @@ def delete_product(product_id: str):
 # ==========================================================
 
 @app.get("/customers")
-def get_customers():
-    response = supabase.table("customers").select("*").execute()
+def get_customers(seller_id: str | None = None):
+    """
+    Customers list দেখাবে.
+
+    seller_id দিলে শুধু ওই seller-এর customers দেখাবে।
+    seller_id না দিলে আগের মতো সব customers দেখাবে।
+    """
+
+    query = supabase.table("customers").select("*")
+
+    if seller_id:
+        query = query.eq("seller_id", seller_id)
+
+    response = query.execute()
     return {"data": response.data}
 
 
 @app.get("/customers/{customer_id}")
 def get_customer_detail(customer_id: str):
-    response = supabase.table("customers").select("*").eq("id", customer_id).execute()
+    response = (
+        supabase
+        .table("customers")
+        .select("*")
+        .eq("id", customer_id)
+        .execute()
+    )
 
     if not response.data:
         raise HTTPException(status_code=404, detail="Customer not found")
@@ -534,14 +662,19 @@ def get_customer_detail(customer_id: str):
 
 @app.post("/customers")
 def create_customer(customer: CustomerCreate):
-    response = supabase.table("customers").insert({
-        "seller_id": customer.seller_id,
-        "name": customer.name,
-        "phone": customer.phone,
-        "address": customer.address,
-        "facebook_id": customer.facebook_id,
-        "whatsapp_number": customer.whatsapp_number
-    }).execute()
+    response = (
+        supabase
+        .table("customers")
+        .insert({
+            "seller_id": customer.seller_id,
+            "name": customer.name,
+            "phone": customer.phone,
+            "address": customer.address,
+            "facebook_id": customer.facebook_id,
+            "whatsapp_number": customer.whatsapp_number,
+        })
+        .execute()
+    )
 
     return {"data": response.data}
 
@@ -565,14 +698,27 @@ def update_customer(customer_id: str, customer: CustomerUpdate):
     if customer.whatsapp_number is not None:
         update_data["whatsapp_number"] = customer.whatsapp_number
 
-    response = supabase.table("customers").update(update_data).eq("id", customer_id).execute()
+    response = (
+        supabase
+        .table("customers")
+        .update(update_data)
+        .eq("id", customer_id)
+        .execute()
+    )
 
     return {"data": response.data}
 
 
 @app.delete("/customers/{customer_id}")
 def delete_customer(customer_id: str):
-    response = supabase.table("customers").delete().eq("id", customer_id).execute()
+    response = (
+        supabase
+        .table("customers")
+        .delete()
+        .eq("id", customer_id)
+        .execute()
+    )
+
     return {"data": response.data}
 
 
@@ -581,23 +727,61 @@ def delete_customer(customer_id: str):
 # ==========================================================
 
 @app.get("/orders")
-def get_orders():
-    response = supabase.table("orders").select("*").execute()
+def get_orders(seller_id: str | None = None):
+    """
+    Orders list দেখাবে.
+
+    seller_id দিলে শুধু ওই seller-এর orders দেখাবে।
+    seller_id না দিলে আগের মতো সব orders দেখাবে।
+    """
+
+    query = supabase.table("orders").select("*")
+
+    if seller_id:
+        query = query.eq("seller_id", seller_id)
+
+    response = query.execute()
     return {"data": response.data}
 
 
 @app.get("/orders/{order_id}")
 def get_order_detail(order_id: str):
-    order_response = supabase.table("orders").select("*").eq("id", order_id).execute()
+    order_response = (
+        supabase
+        .table("orders")
+        .select("*")
+        .eq("id", order_id)
+        .execute()
+    )
 
     if not order_response.data:
         raise HTTPException(status_code=404, detail="Order not found")
 
     order = order_response.data[0]
 
-    customer_response = supabase.table("customers").select("*").eq("id", order["customer_id"]).execute()
-    product_response = supabase.table("products").select("*").eq("id", order["product_id"]).execute()
-    seller_response = supabase.table("sellers").select("*").eq("id", order["seller_id"]).execute()
+    customer_response = (
+        supabase
+        .table("customers")
+        .select("*")
+        .eq("id", order["customer_id"])
+        .execute()
+    )
+
+    product_response = (
+        supabase
+        .table("products")
+        .select("*")
+        .eq("id", order["product_id"])
+        .execute()
+    )
+
+    seller_response = (
+        supabase
+        .table("sellers")
+        .select("*")
+        .eq("id", order["seller_id"])
+        .execute()
+    )
 
     return {
         "data": {
@@ -608,14 +792,20 @@ def get_order_detail(order_id: str):
             "created_at": order["created_at"],
             "customer": customer_response.data[0] if customer_response.data else None,
             "product": product_response.data[0] if product_response.data else None,
-            "seller": seller_response.data[0] if seller_response.data else None
+            "seller": seller_response.data[0] if seller_response.data else None,
         }
     }
 
 
 @app.post("/orders")
 def create_order(order: OrderCreate):
-    product_response = supabase.table("products").select("*").eq("id", order.product_id).execute()
+    product_response = (
+        supabase
+        .table("products")
+        .select("*")
+        .eq("id", order.product_id)
+        .execute()
+    )
 
     if not product_response.data:
         raise HTTPException(status_code=404, detail="Product not found")
@@ -624,14 +814,19 @@ def create_order(order: OrderCreate):
     product_price = float(product["price"])
     total = product_price * order.quantity
 
-    response = supabase.table("orders").insert({
-        "seller_id": order.seller_id,
-        "customer_id": order.customer_id,
-        "product_id": order.product_id,
-        "quantity": order.quantity,
-        "total": total,
-        "status": order.status
-    }).execute()
+    response = (
+        supabase
+        .table("orders")
+        .insert({
+            "seller_id": order.seller_id,
+            "customer_id": order.customer_id,
+            "product_id": order.product_id,
+            "quantity": order.quantity,
+            "total": total,
+            "status": order.status,
+        })
+        .execute()
+    )
 
     return {"data": response.data}
 
@@ -654,17 +849,38 @@ def update_order(order_id: str, order: OrderUpdate):
 
     # product বা quantity change হলে total আবার calculate হবে
     if order.product_id is not None or order.quantity is not None:
-        existing_order_response = supabase.table("orders").select("*").eq("id", order_id).execute()
+        existing_order_response = (
+            supabase
+            .table("orders")
+            .select("*")
+            .eq("id", order_id)
+            .execute()
+        )
 
         if not existing_order_response.data:
             raise HTTPException(status_code=404, detail="Order not found")
 
         existing_order = existing_order_response.data[0]
 
-        product_id = order.product_id if order.product_id is not None else existing_order["product_id"]
-        quantity = order.quantity if order.quantity is not None else existing_order["quantity"]
+        product_id = (
+            order.product_id
+            if order.product_id is not None
+            else existing_order["product_id"]
+        )
 
-        product_response = supabase.table("products").select("*").eq("id", product_id).execute()
+        quantity = (
+            order.quantity
+            if order.quantity is not None
+            else existing_order["quantity"]
+        )
+
+        product_response = (
+            supabase
+            .table("products")
+            .select("*")
+            .eq("id", product_id)
+            .execute()
+        )
 
         if not product_response.data:
             raise HTTPException(status_code=404, detail="Product not found")
@@ -673,12 +889,82 @@ def update_order(order_id: str, order: OrderUpdate):
         product_price = float(product["price"])
         update_data["total"] = product_price * quantity
 
-    response = supabase.table("orders").update(update_data).eq("id", order_id).execute()
+    response = (
+        supabase
+        .table("orders")
+        .update(update_data)
+        .eq("id", order_id)
+        .execute()
+    )
 
     return {"data": response.data}
 
 
 @app.delete("/orders/{order_id}")
 def delete_order(order_id: str):
-    response = supabase.table("orders").delete().eq("id", order_id).execute()
+    response = (
+        supabase
+        .table("orders")
+        .delete()
+        .eq("id", order_id)
+        .execute()
+    )
+
     return {"data": response.data}
+
+# ==========================================================
+# Dashboard Summary
+# ==========================================================
+
+@app.get("/dashboard/summary")
+def get_dashboard_summary(seller_id: str | None = None):
+    """
+    Simple dashboard summary.
+
+    seller_id দিলে শুধু ওই seller-এর summary দেখাবে।
+    seller_id না দিলে for now সব data-এর summary দেখাবে।
+    """
+
+    products_query = supabase.table("products").select("id")
+    customers_query = supabase.table("customers").select("id")
+    orders_query = supabase.table("orders").select("id, total, status")
+
+    if seller_id:
+        products_query = products_query.eq("seller_id", seller_id)
+        customers_query = customers_query.eq("seller_id", seller_id)
+        orders_query = orders_query.eq("seller_id", seller_id)
+
+    products_response = products_query.execute()
+    customers_response = customers_query.execute()
+    orders_response = orders_query.execute()
+
+    products = products_response.data or []
+    customers = customers_response.data or []
+    orders = orders_response.data or []
+
+    total_sales = 0
+
+    for order in orders:
+        order_total = order.get("total") or 0
+        total_sales += float(order_total)
+
+    pending_orders = len([
+        order for order in orders
+        if order.get("status") == "pending"
+    ])
+
+    delivered_orders = len([
+        order for order in orders
+        if order.get("status") == "delivered"
+    ])
+
+    return {
+        "data": {
+            "total_products": len(products),
+            "total_customers": len(customers),
+            "total_orders": len(orders),
+            "total_sales": total_sales,
+            "pending_orders": pending_orders,
+            "delivered_orders": delivered_orders,
+        }
+    }
