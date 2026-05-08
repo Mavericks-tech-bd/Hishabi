@@ -63,7 +63,7 @@ type SellerPlanData = {
   remaining_products: number | "unlimited";
 };
 
-type DashboardSummary = {
+export type  DashboardSummary = {
   total_products: number;
   total_customers: number;
   total_orders: number;
