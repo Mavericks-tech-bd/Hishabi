@@ -577,14 +577,24 @@ export default function OrdersSection({ sectionProps }: SectionProps) {
               <h2 className="mb-5 text-xl font-bold">Orders</h2>
 
               {ordersLoading && (
-                <div className="rounded-xl bg-slate-50 p-6 text-sm text-slate-500">
-                  Loading orders...
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-8 text-center shadow-sm">
+                  <p className="text-sm font-semibold text-slate-700">
+                    Loading orders...
+                  </p>
+                  <p className="mt-1 text-sm text-slate-500">
+                    Please wait while Hishabi loads your order list.
+                  </p>
                 </div>
               )}
 
               {!ordersLoading && getVisibleOrders().length === 0 && (
-                <div className="rounded-xl bg-slate-50 p-6 text-sm text-slate-500">
-                  No orders found.
+                <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center shadow-sm">
+                  <p className="text-base font-bold text-slate-800">
+                    No orders found
+                  </p>
+                  <p className="mt-2 text-sm text-slate-500">
+                    Create your first order after adding at least one customer and one product.
+                  </p>
                 </div>
               )}
 

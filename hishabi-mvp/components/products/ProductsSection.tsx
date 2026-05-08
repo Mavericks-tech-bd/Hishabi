@@ -296,16 +296,28 @@ export default function ProductsSection({
               <h2 className="mb-5 text-xl font-bold">Products</h2>
 
               {productsLoading && (
-                <div className="rounded-xl bg-slate-50 p-6 text-sm text-slate-500">
-                  Loading products...
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-8 text-center shadow-sm">
+                  <p className="text-sm font-semibold text-slate-700">
+                    Loading products...
+                  </p>
+                  <p className="mt-1 text-sm text-slate-500">
+                    Please wait while Hishabi loads your product list.
+                  </p>
                 </div>
               )}
 
               {!productsLoading && getVisibleProducts().length === 0 && (
-                <div className="rounded-xl bg-slate-50 p-6 text-sm text-slate-500">
-                  {productSearchQuery.trim()
-                    ? "No products matched your search."
-                    : "No products found."}
+                <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center shadow-sm">
+                  <p className="text-base font-bold text-slate-800">
+                    {productSearchQuery.trim()
+                      ? "No matching products found"
+                      : "No products yet"}
+                  </p>
+                  <p className="mt-2 text-sm text-slate-500">
+                    {productSearchQuery.trim()
+                      ? "Try a different search term or clear the filter."
+                      : "Add your first product to start building your seller catalog."}
+                  </p>
                 </div>
               )}
 
