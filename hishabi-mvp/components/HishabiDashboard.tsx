@@ -9,88 +9,16 @@ import ProductsSection from "@/components/products/ProductsSection";
 import CustomersSection from "@/components/customers/CustomersSection";
 import OrdersSection from "@/components/orders/OrdersSection";
 import { API_BASE_URL, getApiErrorMessage, safeJson } from "@/lib/api";
-
-type Product = {
-  id: string;
-  seller_id: string;
-  name: string;
-  price: number;
-  image_url?: string | null;
-};
-
-type Customer = {
-  id: string;
-  seller_id: string;
-  name: string;
-  phone?: string | null;
-  address?: string | null;
-  facebook_id?: string | null;
-  whatsapp_number?: string | null;
-};
-
-type OrderStatus =
-  | "pending"
-  | "confirmed"
-  | "shipped"
-  | "delivered"
-  | "cancelled";
-
-type Order = {
-  id: string;
-  seller_id: string;
-  customer_id: string;
-  product_id: string;
-  quantity: number;
-  total?: number | null;
-  status: OrderStatus;
-};
-
-type OrderDetail = {
-  order_id: string;
-  status: OrderStatus;
-  quantity: number;
-  total?: number | null;
-  customer?: Customer | null;
-  product?: Product | null;
-  seller?: {
-    id?: string;
-    name?: string | null;
-    phone?: string | null;
-    plan?: string | null;
-  } | null;
-};
-
-type SellerPlanData = {
-  seller_id: string;
-  name?: string | null;
-  phone?: string | null;
-  plan: string;
-  product_limit: number | "unlimited";
-  current_product_count: number;
-  remaining_products: number | "unlimited";
-};
-
-type DashboardSummary = {
-  total_products: number;
-  total_customers: number;
-  total_orders: number;
-  total_sales: number;
-  average_order_value: number;
-  pending_orders: number;
-  confirmed_orders: number;
-  shipped_orders: number;
-  delivered_orders: number;
-  cancelled_orders: number;
-};
-
-type ActiveSection =
- | "dashboard" 
- | "seller"
- | "products"
- | "customers"
- | "orders" 
- | "plan";
-
+import type {
+  ActiveSection,
+  Customer,
+  DashboardSummary,
+  Order,
+  OrderDetail,
+  OrderStatus,
+  Product,
+  SellerPlanData,
+} from "@/types";
 
 const ORDER_STATUSES: OrderStatus[] = [
   "pending",
