@@ -263,7 +263,7 @@ export default function OrdersSection({ sectionProps }: SectionProps) {
                         type="button"
                         onClick={() => fetchOrderOptionsForSeller()}
                         disabled={orderOptionsLoading}
-                        className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-60"
+                        className="w-full rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-60 md:w-auto"
                       >
                         {orderOptionsLoading
                           ? "Loading..."
@@ -369,7 +369,7 @@ export default function OrdersSection({ sectionProps }: SectionProps) {
                     <button
                       type="submit"
                       disabled={orderSubmitting}
-                      className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-60"
+                      className="w-full rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-60 md:w-auto"
                     >
                       {orderSubmitting ? "Creating..." : "Create Order"}
                     </button>
@@ -377,7 +377,7 @@ export default function OrdersSection({ sectionProps }: SectionProps) {
                     <button
                       type="button"
                       onClick={() => setShowOrderForm(false)}
-                      className="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                      className="w-full rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 md:w-auto"
                     >
                       Cancel
                     </button>
@@ -404,7 +404,7 @@ export default function OrdersSection({ sectionProps }: SectionProps) {
                 <button
                   type="button"
                   onClick={() => fetchOrders(filterOrderSellerId)}
-                  className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+                  className="w-full rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 md:w-auto"
                 >
                   Apply Filter
                 </button>
@@ -416,7 +416,7 @@ export default function OrdersSection({ sectionProps }: SectionProps) {
                     setOrderStatusFilter("all");
                     fetchOrders("");
                   }}
-                  className="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                  className="w-full rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 md:w-auto"
                 >
                   Show All
                 </button>
@@ -452,7 +452,7 @@ export default function OrdersSection({ sectionProps }: SectionProps) {
                   <button
                     type="button"
                     onClick={() => setOrderDetail(null)}
-                    className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                    className="min-h-10 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 sm:w-auto"
                   >
                     Close
                   </button>
@@ -630,7 +630,7 @@ export default function OrdersSection({ sectionProps }: SectionProps) {
                                 )
                               }
                               disabled={editOrderOptionsLoading}
-                              className="mt-3 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 disabled:opacity-60"
+                              className="mt-3 min-h-10 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 disabled:opacity-60 sm:w-auto"
                             >
                               {editOrderOptionsLoading
                                 ? "Loading dropdowns..."

@@ -286,7 +286,7 @@ export default function CustomersSection({ sectionProps }: SectionProps) {
                     <button
                       type="submit"
                       disabled={customerSubmitting}
-                      className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-60"
+                      className="w-full rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-60 md:w-auto"
                     >
                       {customerSubmitting ? "Adding..." : "Save Customer"}
                     </button>
@@ -294,7 +294,7 @@ export default function CustomersSection({ sectionProps }: SectionProps) {
                     <button
                       type="button"
                       onClick={() => setShowCustomerForm(false)}
-                      className="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                      className="w-full rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 md:w-auto"
                     >
                       Cancel
                     </button>
@@ -321,7 +321,7 @@ export default function CustomersSection({ sectionProps }: SectionProps) {
                 <button
                   type="button"
                   onClick={() => fetchCustomers(filterCustomerSellerId)}
-                  className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+                  className="w-full rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 md:w-auto"
                 >
                   Apply Filter
                 </button>
@@ -332,7 +332,7 @@ export default function CustomersSection({ sectionProps }: SectionProps) {
                     setFilterCustomerSellerId("");
                     fetchCustomers("");
                   }}
-                  className="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                  className="w-full rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 md:w-auto"
                 >
                   Show All
                 </button>
@@ -367,7 +367,7 @@ export default function CustomersSection({ sectionProps }: SectionProps) {
                 <button
                   type="button"
                   onClick={() => setCustomerSearchQuery("")}
-                  className="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                  className="w-full rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 md:w-auto"
                 >
                   Clear Search
                 </button>
