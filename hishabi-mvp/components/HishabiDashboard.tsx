@@ -2129,8 +2129,21 @@ export default function HishabiDashboard() {
         </section>
 
         {message && (
-          <section className="mb-8 rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-700 shadow-sm">
-            {message}
+          <section className="mb-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white">
+                !
+              </div>
+
+              <div>
+                <p className="text-sm font-semibold text-slate-900">
+                  Hishabi message
+                </p>
+                <p className="mt-1 text-sm leading-6 text-slate-600">
+                  {message}
+                </p>
+              </div>
+            </div>
           </section>
         )}
 
