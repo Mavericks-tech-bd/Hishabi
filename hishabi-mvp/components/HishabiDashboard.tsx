@@ -1933,16 +1933,16 @@ export default function HishabiDashboard() {
 
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-8 text-slate-900">
+    <main className="min-h-screen bg-slate-50 px-4 py-6 text-slate-900 md:py-8">
       <div className="mx-auto max-w-6xl">
-        <section className="mb-8 rounded-2xl bg-white p-6 shadow-sm">
+        <section className="mb-8 rounded-2xl bg-white p-5 shadow-sm md:p-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div>
+            <div className="w-full md:w-auto">
               <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">
                 Hishabi MVP
               </p>
 
-              <h1 className="mt-2 text-3xl font-bold text-slate-950">
+              <h1 className="mt-2 text-2xl font-bold text-slate-950 md:text-3xl">
                 Seller Dashboard
               </h1>
 
@@ -1978,7 +1978,7 @@ export default function HishabiDashboard() {
                       dashboardSellerId || activeGlobalSellerId
                     )
                   }
-                  className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+                  className="w-full rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 md:w-auto"
                 >
                   Refresh Summary
                 </button>
@@ -2043,7 +2043,7 @@ export default function HishabiDashboard() {
                 key={section}
                 type="button"
                 onClick={() => selectTab(section)}
-                className={`rounded-xl px-5 py-3 text-sm font-semibold capitalize transition ${
+                className={`min-w-[120px] flex-1 rounded-xl px-5 py-3 text-sm font-semibold capitalize transition sm:flex-none ${
                   activeSection === section
                     ? "bg-slate-900 text-white"
                     : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
@@ -2055,7 +2055,7 @@ export default function HishabiDashboard() {
           </div>
         </section>
 
-        <section className="mb-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section className="mb-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:p-6">
           <h2 className="text-xl font-bold text-slate-900">
             Global Seller ID
           </h2>
@@ -2078,7 +2078,7 @@ export default function HishabiDashboard() {
               type="button"
               onClick={applyGlobalSellerId}
               disabled={globalSellerLoading}
-              className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 md:w-auto"
             >
               {globalSellerLoading ? "Applying..." : "Apply Seller ID"}
             </button>
@@ -2087,7 +2087,7 @@ export default function HishabiDashboard() {
               type="button"
               onClick={clearGlobalSellerId}
               disabled={globalSellerLoading}
-              className="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60 md:w-auto"
             >
               Clear
             </button>
