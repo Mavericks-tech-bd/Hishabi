@@ -123,6 +123,20 @@ def validate_required_id(value: str | None, field_name: str) -> str:
     return cleaned_value
 
 
+def validate_uuid_id(value: str | None, field_name: str) -> str:
+    cleaned_value = validate_required_id(value, field_name)
+
+    try:
+        uuid.UUID(cleaned_value)
+    except ValueError:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid {field_name}.",
+        )
+
+    return cleaned_value
+
+
 def validate_required_text(value: str | None, field_name: str) -> str:
     cleaned_value = clean_text(value)
 
@@ -196,7 +210,7 @@ def get_product_image_limit(plan: str):
 
 
 def get_seller_or_404(seller_id: str):
-    cleaned_seller_id = validate_required_id(seller_id, "Seller ID")
+    cleaned_seller_id = validate_uuid_id(seller_id, "Seller ID")
 
     response = (
         supabase
@@ -216,7 +230,7 @@ def get_seller_or_404(seller_id: str):
 
 
 def get_product_or_404(product_id: str):
-    cleaned_product_id = validate_required_id(product_id, "Product ID")
+    cleaned_product_id = validate_uuid_id(product_id, "Product ID")
 
     response = (
         supabase
@@ -236,7 +250,7 @@ def get_product_or_404(product_id: str):
 
 
 def get_customer_or_404(customer_id: str):
-    cleaned_customer_id = validate_required_id(customer_id, "Customer ID")
+    cleaned_customer_id = validate_uuid_id(customer_id, "Customer ID")
 
     response = (
         supabase
@@ -256,7 +270,7 @@ def get_customer_or_404(customer_id: str):
 
 
 def get_order_or_404(order_id: str):
-    cleaned_order_id = validate_required_id(order_id, "Order ID")
+    cleaned_order_id = validate_uuid_id(order_id, "Order ID")
 
     response = (
         supabase
@@ -580,7 +594,7 @@ def delete_product_image(image_id: str):
 
 @app.post("/products")
 def create_product(product: ProductCreate):
-    seller_id = validate_required_id(product.seller_id, "Seller ID")
+    seller_id = validate_uuid_id(product.seller_id, "Seller ID")
     product_name = validate_required_text(product.name, "Product name")
     product_price = validate_price(product.price)
 
@@ -740,7 +754,7 @@ def get_customer_detail(customer_id: str):
 
 @app.post("/customers")
 def create_customer(customer: CustomerCreate):
-    seller_id = validate_required_id(customer.seller_id, "Seller ID")
+    seller_id = validate_uuid_id(customer.seller_id, "Seller ID")
     customer_name = validate_required_text(customer.name, "Customer name")
 
     get_seller_or_404(seller_id)
@@ -885,9 +899,9 @@ def get_order_detail(order_id: str):
 
 @app.post("/orders")
 def create_order(order: OrderCreate):
-    seller_id = validate_required_id(order.seller_id, "Seller ID")
-    customer_id = validate_required_id(order.customer_id, "Customer ID")
-    product_id = validate_required_id(order.product_id, "Product ID")
+    seller_id = validate_uuid_id(order.seller_id, "Seller ID")
+    customer_id = validate_uuid_id(order.customer_id, "Customer ID")
+    product_id = validate_uuid_id(order.product_id, "Product ID")
     quantity = validate_quantity(order.quantity)
     status = validate_order_status(order.status)
 
@@ -929,13 +943,13 @@ def update_order(order_id: str, order: OrderUpdate):
     update_data = {}
 
     if order.customer_id is not None:
-        customer_id = validate_required_id(order.customer_id, "Customer ID")
+        customer_id = validate_uuid_id(order.customer_id, "Customer ID")
         customer = get_customer_or_404(customer_id)
         validate_customer_belongs_to_seller(customer, seller_id)
         update_data["customer_id"] = customer_id
 
     if order.product_id is not None:
-        product_id = validate_required_id(order.product_id, "Product ID")
+        product_id = validate_uuid_id(order.product_id, "Product ID")
         product = get_product_or_404(product_id)
         validate_product_belongs_to_seller(product, seller_id)
         update_data["product_id"] = product_id
