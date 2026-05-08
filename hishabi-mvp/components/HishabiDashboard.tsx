@@ -8,6 +8,7 @@ import PlanSection from "@/components/plan/PlanSection";
 import ProductsSection from "@/components/products/ProductsSection";
 import CustomersSection from "@/components/customers/CustomersSection";
 import OrdersSection from "@/components/orders/OrdersSection";
+import { API_BASE_URL, getApiErrorMessage, safeJson } from "@/lib/api";
 
 type Product = {
   id: string;
@@ -90,7 +91,6 @@ type ActiveSection =
  | "orders" 
  | "plan";
 
-const API_BASE_URL = "http://127.0.0.1:8003";
 
 const ORDER_STATUSES: OrderStatus[] = [
   "pending",
@@ -275,52 +275,6 @@ export default function HishabiDashboard() {
     fetchOrders("");
     fetchDashboardSummary("");
   }, []);
-
-  async function safeJson(response: Response) {
-    try {
-      return await response.json();
-    } catch {
-      return null;
-    }
-  }
-
-  function getApiErrorMessage(result: any, fallbackMessage: string) {
-    if (!result) {
-      return fallbackMessage;
-    }
-
-    if (typeof result.detail === "string") {
-      return result.detail;
-    }
-
-    if (typeof result.message === "string") {
-      return result.message;
-    }
-
-    if (result.detail?.message) {
-      return result.detail.message;
-    }
-
-    if (result.detail?.upgrade_message) {
-      return result.detail.upgrade_message;
-    }
-
-    if (Array.isArray(result.detail) && result.detail.length > 0) {
-      const firstError = result.detail[0];
-      const fieldName = Array.isArray(firstError?.loc)
-        ? firstError.loc.filter((item: string) => item !== "body").join(".")
-        : "field";
-
-      return `${fieldName}: ${firstError?.msg || fallbackMessage}`;
-    }
-
-    if (Array.isArray(result.field_errors) && result.field_errors.length > 0) {
-      const firstError = result.field_errors[0];
-      return `${firstError.field}: ${firstError.message}`;
-    }
-
-    return fallbackMessage;
-  }
 
   function isValidPositiveNumber(value: string) {
     const numericValue = Number(value);
