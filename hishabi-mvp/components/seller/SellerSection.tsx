@@ -53,7 +53,7 @@ export default function SellerSection({
                   type="button"
                   onClick={() => loadSellerHelper()}
                   disabled={sellerHelperLoading}
-                  className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="w-full rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 md:w-auto"
                 >
                   {sellerHelperLoading ? "Loading..." : "Load Seller"}
                 </button>
@@ -62,7 +62,7 @@ export default function SellerSection({
                   type="button"
                   onClick={applySellerHelperAsGlobalSeller}
                   disabled={sellerHelperLoading || globalSellerLoading}
-                  className="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="w-full rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60 md:w-auto"
                 >
                   Apply as Global Seller
                 </button>
@@ -173,7 +173,7 @@ export default function SellerSection({
                       type="button"
                       onClick={applySellerHelperAsGlobalSeller}
                       disabled={globalSellerLoading}
-                      className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="w-full rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 md:w-auto"
                     >
                       {globalSellerLoading
                         ? "Applying..."
@@ -187,7 +187,7 @@ export default function SellerSection({
                         setActiveSection("plan");
                         fetchPlanForSeller(sellerHelperData.seller_id);
                       }}
-                      className="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                      className="w-full rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 md:w-auto"
                     >
                       Open in Plan Section
                     </button>

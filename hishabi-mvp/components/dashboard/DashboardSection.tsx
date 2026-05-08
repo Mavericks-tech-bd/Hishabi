@@ -41,7 +41,7 @@ export default function DashboardSection({
                   type="button"
                   onClick={() => fetchDashboardSummary()}
                   disabled={dashboardLoading}
-                  className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="w-full rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 md:w-auto"
                 >
                   {dashboardLoading ? "Loading..." : "Load Summary"}
                 </button>
@@ -52,7 +52,7 @@ export default function DashboardSection({
                     setDashboardSellerId("");
                     fetchDashboardSummary("");
                   }}
-                  className="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                  className="w-full rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 md:w-auto"
                 >
                   Show Overall
                 </button>

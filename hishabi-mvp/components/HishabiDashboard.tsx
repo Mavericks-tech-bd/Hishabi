@@ -224,7 +224,7 @@ export default function HishabiDashboard() {
       <button
         type="button"
         onClick={() => copyText(value, label)}
-        className="rounded-lg border border-slate-300 px-2 py-1 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
+        className="min-h-9 rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
       >
         Copy
       </button>
@@ -1988,7 +1988,7 @@ export default function HishabiDashboard() {
                 <button
                   type="button"
                   onClick={handleOpenProductForm}
-                  className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+                  className="w-full rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 md:w-auto"
                 >
                   {showProductForm ? "Close Form" : "+ Add Product"}
                 </button>
@@ -1998,7 +1998,7 @@ export default function HishabiDashboard() {
                 <button
                   type="button"
                   onClick={handleOpenCustomerForm}
-                  className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+                  className="w-full rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 md:w-auto"
                 >
                   {showCustomerForm ? "Close Form" : "+ Add Customer"}
                 </button>
@@ -2008,7 +2008,7 @@ export default function HishabiDashboard() {
                 <button
                   type="button"
                   onClick={handleOpenOrderForm}
-                  className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+                  className="w-full rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 md:w-auto"
                 >
                   {showOrderForm ? "Close Form" : "+ Create Order"}
                 </button>
@@ -2020,7 +2020,7 @@ export default function HishabiDashboard() {
                   onClick={() =>
                     fetchPlanForSeller(planSellerId || activeGlobalSellerId)
                   }
-                  className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+                  className="w-full rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 md:w-auto"
                 >
                   Refresh Plan
                 </button>

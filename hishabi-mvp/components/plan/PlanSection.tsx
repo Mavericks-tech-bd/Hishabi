@@ -58,7 +58,7 @@ export default function PlanSection({
                   type="button"
                   onClick={() => fetchPlanForSeller()}
                   disabled={planLoading}
-                  className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-60"
+                  className="w-full rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-60 md:w-auto"
                 >
                   {planLoading ? "Loading..." : "Load Plan"}
                 </button>
