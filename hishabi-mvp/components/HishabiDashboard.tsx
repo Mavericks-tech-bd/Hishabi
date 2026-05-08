@@ -3,6 +3,11 @@
 import { useEffect, useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import DashboardSection from "@/components/dashboard/DashboardSection";
+import SellerSection from "@/components/seller/SellerSection";
+import PlanSection from "@/components/plan/PlanSection";
+import ProductsSection from "@/components/products/ProductsSection";
+import CustomersSection from "@/components/customers/CustomersSection";
+import OrdersSection from "@/components/orders/OrdersSection";
 
 type Product = {
   id: string;
@@ -1829,6 +1834,222 @@ export default function HishabiDashboard() {
     }
   }
 
+  const extractedSectionProps = {
+    ORDER_STATUSES,
+    PLAN_OPTIONS,
+    getImageLimitByPlan,
+    formatTaka,
+    shortId,
+    activeSection,
+    setActiveSection,
+    message,
+    setMessage,
+    globalSellerId,
+    setGlobalSellerId,
+    activeGlobalSellerId,
+    setActiveGlobalSellerId,
+    globalSellerLoading,
+    setGlobalSellerLoading,
+    sellerHelperId,
+    setSellerHelperId,
+    sellerHelperData,
+    setSellerHelperData,
+    sellerHelperLoading,
+    setSellerHelperLoading,
+    products,
+    setProducts,
+    productsLoading,
+    setProductsLoading,
+    showProductForm,
+    setShowProductForm,
+    productSubmitting,
+    setProductSubmitting,
+    filterSellerId,
+    setFilterSellerId,
+    productSearchQuery,
+    setProductSearchQuery,
+    sellerId,
+    setSellerId,
+    productName,
+    setProductName,
+    productPrice,
+    setProductPrice,
+    selectedImages,
+    setSelectedImages,
+    sellerPlan,
+    setSellerPlan,
+    imageLimit,
+    setImageLimit,
+    editingProductId,
+    setEditingProductId,
+    editProductName,
+    setEditProductName,
+    editProductPrice,
+    setEditProductPrice,
+    editProductSubmitting,
+    setEditProductSubmitting,
+    customers,
+    setCustomers,
+    customersLoading,
+    setCustomersLoading,
+    showCustomerForm,
+    setShowCustomerForm,
+    customerSubmitting,
+    setCustomerSubmitting,
+    filterCustomerSellerId,
+    setFilterCustomerSellerId,
+    customerSearchQuery,
+    setCustomerSearchQuery,
+    customerSellerId,
+    setCustomerSellerId,
+    customerName,
+    setCustomerName,
+    customerPhone,
+    setCustomerPhone,
+    customerAddress,
+    setCustomerAddress,
+    customerFacebookId,
+    setCustomerFacebookId,
+    customerWhatsappNumber,
+    setCustomerWhatsappNumber,
+    editingCustomerId,
+    setEditingCustomerId,
+    editCustomerName,
+    setEditCustomerName,
+    editCustomerPhone,
+    setEditCustomerPhone,
+    editCustomerAddress,
+    setEditCustomerAddress,
+    editCustomerFacebookId,
+    setEditCustomerFacebookId,
+    editCustomerWhatsappNumber,
+    setEditCustomerWhatsappNumber,
+    editCustomerSubmitting,
+    setEditCustomerSubmitting,
+    orders,
+    setOrders,
+    ordersLoading,
+    setOrdersLoading,
+    showOrderForm,
+    setShowOrderForm,
+    orderSubmitting,
+    setOrderSubmitting,
+    filterOrderSellerId,
+    setFilterOrderSellerId,
+    orderStatusFilter,
+    setOrderStatusFilter,
+    orderSellerId,
+    setOrderSellerId,
+    orderCustomerId,
+    setOrderCustomerId,
+    orderProductId,
+    setOrderProductId,
+    orderQuantity,
+    setOrderQuantity,
+    orderStatus,
+    setOrderStatus,
+    orderAvailableCustomers,
+    setOrderAvailableCustomers,
+    orderAvailableProducts,
+    setOrderAvailableProducts,
+    orderOptionsLoading,
+    setOrderOptionsLoading,
+    editingOrderId,
+    setEditingOrderId,
+    editOrderSellerId,
+    setEditOrderSellerId,
+    editOrderCustomerId,
+    setEditOrderCustomerId,
+    editOrderProductId,
+    setEditOrderProductId,
+    editOrderQuantity,
+    setEditOrderQuantity,
+    editOrderStatus,
+    setEditOrderStatus,
+    editOrderSubmitting,
+    setEditOrderSubmitting,
+    editOrderAvailableCustomers,
+    setEditOrderAvailableCustomers,
+    editOrderAvailableProducts,
+    setEditOrderAvailableProducts,
+    editOrderOptionsLoading,
+    setEditOrderOptionsLoading,
+    orderDetail,
+    setOrderDetail,
+    orderDetailLoading,
+    setOrderDetailLoading,
+    planSellerId,
+    setPlanSellerId,
+    sellerPlanData,
+    setSellerPlanData,
+    planLoading,
+    setPlanLoading,
+    planUpdating,
+    setPlanUpdating,
+    dashboardSellerId,
+    setDashboardSellerId,
+    dashboardSummary,
+    setDashboardSummary,
+    dashboardLoading,
+    setDashboardLoading,
+    safeJson,
+    getApiErrorMessage,
+    isValidPositiveNumber,
+    copyText,
+    renderCopyButton,
+    fetchProducts,
+    fetchCustomers,
+    fetchOrders,
+    fetchDashboardSummary,
+    fetchSellerPlan,
+    fetchPlanForSeller,
+    fetchOrderOptionsForSeller,
+    fetchEditOrderOptionsForSeller,
+    loadSellerHelper,
+    applySellerHelperAsGlobalSeller,
+    validateSellerExistsForFrontend,
+    applyGlobalSellerId,
+    clearGlobalSellerId,
+    syncFormsWithActiveGlobalSeller,
+    handleOpenProductForm,
+    handleOpenCustomerForm,
+    handleOpenOrderForm,
+    handleImageChange,
+    removeSelectedImage,
+    uploadProductImages,
+    handleAddProduct,
+    handleDeleteProduct,
+    openEditProductForm,
+    cancelProductEdit,
+    handleEditProduct,
+    resetCustomerForm,
+    handleAddCustomer,
+    handleDeleteCustomer,
+    openCustomerEditForm,
+    cancelCustomerEdit,
+    handleEditCustomer,
+    resetOrderForm,
+    handleAddOrder,
+    handleDeleteOrder,
+    openOrderEditForm,
+    cancelOrderEdit,
+    handleEditOrder,
+    handleQuickStatusUpdate,
+    fetchOrderDetail,
+    isPlanSellerLoaded,
+    handleChangeSellerPlan,
+    getVisibleProducts,
+    getVisibleCustomers,
+    getCustomerPhone,
+    getProductPrice,
+    getStatusBadgeClass,
+    getVisibleOrders,
+    getCustomerName,
+    getProductName,
+    selectTab,
+  };
+
+
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-8 text-slate-900">
       <div className="mx-auto max-w-6xl">
@@ -1851,172 +2072,20 @@ export default function HishabiDashboard() {
 
             <div>
               {activeSection === "seller" && (
-          <>
-            <section className="mb-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-              <h2 className="text-xl font-bold text-slate-900">
-                Seller Setup Helper
-              </h2>
-
-              <p className="mt-1 text-sm text-slate-500">
-                Paste a seller ID to load seller plan, product limit, current
-                product count, and apply this seller across the dashboard.
-              </p>
-
-              <div className="mt-5 flex flex-col gap-3 md:flex-row">
-                <input
-                  value={sellerHelperId}
-                  onChange={(event) => setSellerHelperId(event.target.value)}
-                  placeholder="Paste seller ID here"
-                  className="flex-1 rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-900"
-                />
-
-                <button
-                  type="button"
-                  onClick={() => loadSellerHelper()}
-                  disabled={sellerHelperLoading}
-                  className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {sellerHelperLoading ? "Loading..." : "Load Seller"}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={applySellerHelperAsGlobalSeller}
-                  disabled={sellerHelperLoading || globalSellerLoading}
-                  className="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  Apply as Global Seller
-                </button>
-              </div>
-
-              {sellerHelperId.trim() && (
-                <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                  <span>Entered seller ID:</span>
-                  <span className="font-mono font-semibold text-slate-700">
-                    {sellerHelperId.trim()}
-                  </span>
-                  {renderCopyButton(sellerHelperId.trim(), "Seller ID")}
-                </div>
-              )}
-            </section>
-
-            {!sellerHelperData && (
-              <section className="rounded-2xl bg-white p-6 text-sm text-slate-500 shadow-sm">
-                No seller loaded yet. Paste a seller ID and click Load Seller.
-              </section>
-            )}
-
-            {sellerHelperData && (
-              <>
-                <section className="mb-8 grid gap-4 md:grid-cols-5">
-                  <div className="rounded-2xl bg-white p-5 shadow-sm">
-                    <p className="text-sm text-slate-500">Current Plan</p>
-                    <h2 className="mt-2 text-3xl font-bold capitalize">
-                      {sellerHelperData.plan}
-                    </h2>
-                  </div>
-
-                  <div className="rounded-2xl bg-white p-5 shadow-sm">
-                    <p className="text-sm text-slate-500">Product Limit</p>
-                    <h2 className="mt-2 text-2xl font-bold">
-                      {sellerHelperData.product_limit}
-                    </h2>
-                  </div>
-
-                  <div className="rounded-2xl bg-white p-5 shadow-sm">
-                    <p className="text-sm text-slate-500">Current Products</p>
-                    <h2 className="mt-2 text-3xl font-bold">
-                      {sellerHelperData.current_product_count}
-                    </h2>
-                  </div>
-
-                  <div className="rounded-2xl bg-white p-5 shadow-sm">
-                    <p className="text-sm text-slate-500">Remaining Products</p>
-                    <h2 className="mt-2 text-2xl font-bold">
-                      {sellerHelperData.remaining_products}
-                    </h2>
-                  </div>
-
-                  <div className="rounded-2xl bg-white p-5 shadow-sm">
-                    <p className="text-sm text-slate-500">Image Limit</p>
-                    <h2 className="mt-2 text-2xl font-bold">
-                      {getImageLimitByPlan(sellerHelperData.plan)}
-                    </h2>
-                    <p className="mt-1 text-xs text-slate-500">per product</p>
-                  </div>
-                </section>
-
-                <section className="rounded-2xl bg-white p-6 shadow-sm">
-                  <h2 className="text-xl font-bold text-slate-900">
-                    Seller Information
-                  </h2>
-
-                  <div className="mt-4 grid gap-4 md:grid-cols-3">
-                    <div className="rounded-xl bg-slate-50 p-4">
-                      <p className="text-xs font-semibold uppercase text-slate-500">
-                        Seller ID
-                      </p>
-
-                      <div className="mt-2 flex items-center justify-between gap-2">
-                        <p className="break-all font-mono text-sm text-slate-700">
-                          {sellerHelperData.seller_id}
-                        </p>
-                        {renderCopyButton(
-                          sellerHelperData.seller_id,
-                          "Seller ID"
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="rounded-xl bg-slate-50 p-4">
-                      <p className="text-xs font-semibold uppercase text-slate-500">
-                        Name
-                      </p>
-
-                      <p className="mt-2 text-sm font-semibold text-slate-800">
-                        {sellerHelperData.name || "Not added"}
-                      </p>
-                    </div>
-
-                    <div className="rounded-xl bg-slate-50 p-4">
-                      <p className="text-xs font-semibold uppercase text-slate-500">
-                        Phone
-                      </p>
-
-                      <p className="mt-2 text-sm font-semibold text-slate-800">
-                        {sellerHelperData.phone || "Not added"}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="mt-5 flex flex-col gap-3 md:flex-row">
-                    <button
-                      type="button"
-                      onClick={applySellerHelperAsGlobalSeller}
-                      disabled={globalSellerLoading}
-                      className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      {globalSellerLoading
-                        ? "Applying..."
-                        : "Apply This Seller Globally"}
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setPlanSellerId(sellerHelperData.seller_id);
-                        setActiveSection("plan");
-                        fetchPlanForSeller(sellerHelperData.seller_id);
-                      }}
-                      className="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
-                    >
-                      Open in Plan Section
-                    </button>
-                  </div>
-                </section>
-              </>
-            )}
-          </>
+          <SellerSection
+            sellerHelperId={sellerHelperId}
+            setSellerHelperId={setSellerHelperId}
+            sellerHelperLoading={sellerHelperLoading}
+            sellerHelperData={sellerHelperData}
+            globalSellerLoading={globalSellerLoading}
+            loadSellerHelper={loadSellerHelper}
+            applySellerHelperAsGlobalSeller={applySellerHelperAsGlobalSeller}
+            fetchPlanForSeller={fetchPlanForSeller}
+            setActiveSection={setActiveSection}
+            setPlanSellerId={setPlanSellerId}
+            renderCopyButton={renderCopyButton}
+            getImageLimitByPlan={getImageLimitByPlan}
+          />
         )}
 
         {activeSection === "dashboard" && (
@@ -2195,1558 +2264,75 @@ export default function HishabiDashboard() {
         )}
 
         {activeSection === "products" && (
-          <>
-            {showProductForm && (
-              <section className="mb-8 rounded-2xl bg-white p-6 shadow-sm">
-                <h2 className="text-xl font-bold">Add New Product</h2>
-
-                {activeGlobalSellerId && (
-                  <p className="mt-1 text-sm text-slate-500">
-                    Seller ID auto-filled from Global Seller ID.
-                  </p>
-                )}
-
-                <form onSubmit={handleAddProduct} className="mt-6 space-y-5">
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-700">
-                      Seller ID
-                    </label>
-
-                    <input
-                      value={sellerId}
-                      onChange={(event) => {
-                        const value = event.target.value;
-                        setSellerId(value);
-                        fetchSellerPlan(value);
-                      }}
-                      placeholder="Paste seller ID here"
-                      className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-900"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-700">
-                      Product Name
-                    </label>
-
-                    <input
-                      value={productName}
-                      onChange={(event) => setProductName(event.target.value)}
-                      placeholder="Cotton Kurti"
-                      className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-900"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-700">
-                      Price
-                    </label>
-
-                    <input
-                      value={productPrice}
-                      onChange={(event) => setProductPrice(event.target.value)}
-                      placeholder="500"
-                      type="number"
-                      className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-900"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-700">
-                      Product Images
-                    </label>
-
-                    <p className="mb-3 text-sm text-slate-500">
-                      Current plan:{" "}
-                      <span className="font-semibold">{sellerPlan}</span>.
-                      Image limit:{" "}
-                      <span className="font-semibold">{imageLimit}</span> per
-                      product.
-                    </p>
-
-                    <input
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      onChange={handleImageChange}
-                      className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition file:mr-4 file:rounded-lg file:border-0 file:bg-slate-900 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-slate-800"
-                    />
-
-                    {selectedImages.length > 0 && (
-                      <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
-                        <p className="text-sm font-semibold text-slate-700">
-                          Selected {selectedImages.length} image
-                          {selectedImages.length > 1 ? "s" : ""}
-                        </p>
-
-                        <div className="mt-3 space-y-2">
-                          {selectedImages.map((file, index) => (
-                            <div
-                              key={`${file.name}-${file.lastModified}`}
-                              className="flex items-center justify-between gap-3 rounded-lg bg-white px-3 py-2 text-sm"
-                            >
-                              <div>
-                                <p className="font-medium text-slate-700">
-                                  {file.name}
-                                </p>
-
-                                <p className="text-xs text-slate-500">
-                                  {(file.size / 1024 / 1024).toFixed(2)} MB
-                                </p>
-                              </div>
-
-                              <button
-                                type="button"
-                                onClick={() => removeSelectedImage(index)}
-                                className="rounded-full bg-red-50 px-3 py-1 text-sm font-bold text-red-600 transition hover:bg-red-100"
-                              >
-                                ×
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex flex-col gap-3 md:flex-row">
-                    <button
-                      type="submit"
-                      disabled={productSubmitting}
-                      className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-60"
-                    >
-                      {productSubmitting ? "Adding..." : "Save Product"}
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setShowProductForm(false)}
-                      className="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </form>
-              </section>
-            )}
-
-            <section className="mb-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-              <h2 className="text-lg font-bold text-slate-900">
-                Filter Products by Seller
-              </h2>
-
-              <div className="mt-4 flex flex-col gap-3 md:flex-row">
-                <input
-                  value={filterSellerId}
-                  onChange={(event) => setFilterSellerId(event.target.value)}
-                  placeholder="Paste seller ID to filter products"
-                  className="flex-1 rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-900"
-                />
-
-                <button
-                  type="button"
-                  onClick={() => fetchProducts(filterSellerId)}
-                  className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
-                >
-                  Apply Filter
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setFilterSellerId("");
-                    fetchProducts("");
-                  }}
-                  className="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
-                >
-                  Show All
-                </button>
-              </div>
-            </section>
-
-            <section className="mb-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-              <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                <div>
-                  <h2 className="text-lg font-bold text-slate-900">
-                    Search Products
-                  </h2>
-
-                  <p className="mt-1 text-sm text-slate-500">
-                    Search by product name, price, product ID, seller ID, or image URL.
-                  </p>
-                </div>
-
-                <p className="text-sm font-semibold text-slate-600">
-                  Showing {getVisibleProducts().length} of {products.length}
-                </p>
-              </div>
-
-              <div className="mt-4 flex flex-col gap-3 md:flex-row">
-                <input
-                  value={productSearchQuery}
-                  onChange={(event) => setProductSearchQuery(event.target.value)}
-                  placeholder="Search products by name, price, product ID, seller ID..."
-                  className="flex-1 rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-900"
-                />
-
-                <button
-                  type="button"
-                  onClick={() => setProductSearchQuery("")}
-                  className="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
-                >
-                  Clear Search
-                </button>
-              </div>
-            </section>
-
-            <section className="rounded-2xl bg-white p-6 shadow-sm">
-              <h2 className="mb-5 text-xl font-bold">Products</h2>
-
-              {productsLoading && (
-                <div className="rounded-xl bg-slate-50 p-6 text-sm text-slate-500">
-                  Loading products...
-                </div>
-              )}
-
-              {!productsLoading && getVisibleProducts().length === 0 && (
-                <div className="rounded-xl bg-slate-50 p-6 text-sm text-slate-500">
-                  {productSearchQuery.trim()
-                    ? "No products matched your search."
-                    : "No products found."}
-                </div>
-              )}
-
-              {!productsLoading && getVisibleProducts().length > 0 && (
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {getVisibleProducts().map((product) => (
-                    <article
-                      key={product.id}
-                      className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
-                    >
-                      <div className="h-48 bg-slate-100">
-                        {product.image_url &&
-                        product.image_url.startsWith("http") ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={product.image_url}
-                            alt={product.name}
-                            className="h-full w-full object-cover"
-                          />
-                        ) : (
-                          <div className="flex h-full items-center justify-center text-sm text-slate-400">
-                            No product image
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="p-4">
-                        {editingProductId === product.id ? (
-                          <form
-                            onSubmit={(event) =>
-                              handleEditProduct(event, product.id)
-                            }
-                            className="space-y-3"
-                          >
-                            <input
-                              value={editProductName}
-                              onChange={(event) =>
-                                setEditProductName(event.target.value)
-                              }
-                              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-slate-900"
-                              autoFocus
-                            />
-
-                            <input
-                              value={editProductPrice}
-                              onChange={(event) =>
-                                setEditProductPrice(event.target.value)
-                              }
-                              type="number"
-                              min="1"
-                              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-slate-900"
-                            />
-
-                            <div className="flex gap-2">
-                              <button
-                                type="submit"
-                                disabled={editProductSubmitting}
-                                className="flex-1 rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white transition hover:bg-slate-800 disabled:opacity-60"
-                              >
-                                {editProductSubmitting ? "Saving..." : "Save"}
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={cancelProductEdit}
-                                className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-                              >
-                                Cancel
-                              </button>
-                            </div>
-                          </form>
-                        ) : (
-                          <>
-                            <h3 className="text-lg font-bold text-slate-900">
-                              {product.name}
-                            </h3>
-
-                            <p className="mt-1 text-xl font-bold text-slate-950">
-                              {product.price} BDT
-                            </p>
-
-                            <div className="mt-4 space-y-2 text-xs text-slate-500">
-                              <div className="flex items-center justify-between gap-2 rounded-lg bg-slate-50 p-2">
-                                <span className="break-all">
-                                  Product ID:{" "}
-                                  <span className="font-mono">
-                                    {shortId(product.id)}
-                                  </span>
-                                </span>
-                                {renderCopyButton(product.id, "Product ID")}
-                              </div>
-
-                              <div className="flex items-center justify-between gap-2 rounded-lg bg-slate-50 p-2">
-                                <span className="break-all">
-                                  Seller ID:{" "}
-                                  <span className="font-mono">
-                                    {shortId(product.seller_id)}
-                                  </span>
-                                </span>
-                                {renderCopyButton(product.seller_id, "Seller ID")}
-                              </div>
-                            </div>
-
-                            <div className="mt-4 flex gap-2">
-                              <button
-                                type="button"
-                                onClick={() => openEditProductForm(product)}
-                                className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-                              >
-                                Edit
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  handleDeleteProduct(product.id, product.name)
-                                }
-                                className="flex-1 rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-100"
-                              >
-                                Delete
-                              </button>
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              )}
-            </section>
-          </>
+          <ProductsSection
+            products={products}
+            activeGlobalSellerId={activeGlobalSellerId}
+            productsLoading={productsLoading}
+            showProductForm={showProductForm}
+            setShowProductForm={setShowProductForm}
+            productSubmitting={productSubmitting}
+            filterSellerId={filterSellerId}
+            setFilterSellerId={setFilterSellerId}
+            productSearchQuery={productSearchQuery}
+            setProductSearchQuery={setProductSearchQuery}
+            sellerId={sellerId}
+            setSellerId={setSellerId}
+            productName={productName}
+            setProductName={setProductName}
+            productPrice={productPrice}
+            setProductPrice={setProductPrice}
+            selectedImages={selectedImages}
+            setSelectedImages={setSelectedImages}
+            handleImageChange={handleImageChange}
+            removeSelectedImage={removeSelectedImage}
+            sellerPlan={sellerPlan}
+            imageLimit={imageLimit}
+            editingProductId={editingProductId}
+            editProductName={editProductName}
+            setEditProductName={setEditProductName}
+            editProductPrice={editProductPrice}
+            setEditProductPrice={setEditProductPrice}
+            editProductSubmitting={editProductSubmitting}
+            getVisibleProducts={getVisibleProducts}
+            fetchProducts={fetchProducts}
+            fetchSellerPlan={fetchSellerPlan}
+            handleAddProduct={handleAddProduct}
+            handleDeleteProduct={handleDeleteProduct}
+            handleEditProduct={handleEditProduct}
+            cancelProductEdit={cancelProductEdit}
+            openEditProductForm={openEditProductForm}
+            handleOpenProductForm={handleOpenProductForm}
+            renderCopyButton={renderCopyButton}
+            getImageLimitByPlan={getImageLimitByPlan}
+            formatTaka={formatTaka}
+            shortId={shortId}
+          />
         )}
 
         {activeSection === "customers" && (
-          <>
-            {showCustomerForm && (
-              <section className="mb-8 rounded-2xl bg-white p-6 shadow-sm">
-                <h2 className="text-xl font-bold">Add New Customer</h2>
-
-                {activeGlobalSellerId && (
-                  <p className="mt-1 text-sm text-slate-500">
-                    Seller ID auto-filled from Global Seller ID.
-                  </p>
-                )}
-
-                <form onSubmit={handleAddCustomer} className="mt-6 space-y-5">
-                  <input
-                    value={customerSellerId}
-                    onChange={(event) => setCustomerSellerId(event.target.value)}
-                    placeholder="Seller ID"
-                    className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-900"
-                  />
-
-                  <input
-                    value={customerName}
-                    onChange={(event) => setCustomerName(event.target.value)}
-                    placeholder="Customer name"
-                    className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-900"
-                  />
-
-                  <div className="grid gap-5 md:grid-cols-2">
-                    <input
-                      value={customerPhone}
-                      onChange={(event) => setCustomerPhone(event.target.value)}
-                      placeholder="Phone"
-                      className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-900"
-                    />
-
-                    <input
-                      value={customerWhatsappNumber}
-                      onChange={(event) =>
-                        setCustomerWhatsappNumber(event.target.value)
-                      }
-                      placeholder="WhatsApp number"
-                      className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-900"
-                    />
-                  </div>
-
-                  <textarea
-                    value={customerAddress}
-                    onChange={(event) => setCustomerAddress(event.target.value)}
-                    placeholder="Address"
-                    rows={3}
-                    className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-900"
-                  />
-
-                  <input
-                    value={customerFacebookId}
-                    onChange={(event) =>
-                      setCustomerFacebookId(event.target.value)
-                    }
-                    placeholder="Facebook ID"
-                    className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-900"
-                  />
-
-                  <div className="flex flex-col gap-3 md:flex-row">
-                    <button
-                      type="submit"
-                      disabled={customerSubmitting}
-                      className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-60"
-                    >
-                      {customerSubmitting ? "Adding..." : "Save Customer"}
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setShowCustomerForm(false)}
-                      className="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </form>
-              </section>
-            )}
-
-            <section className="mb-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-              <h2 className="text-lg font-bold text-slate-900">
-                Filter Customers by Seller
-              </h2>
-
-              <div className="mt-4 flex flex-col gap-3 md:flex-row">
-                <input
-                  value={filterCustomerSellerId}
-                  onChange={(event) =>
-                    setFilterCustomerSellerId(event.target.value)
-                  }
-                  placeholder="Paste seller ID to filter customers"
-                  className="flex-1 rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-900"
-                />
-
-                <button
-                  type="button"
-                  onClick={() => fetchCustomers(filterCustomerSellerId)}
-                  className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
-                >
-                  Apply Filter
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setFilterCustomerSellerId("");
-                    fetchCustomers("");
-                  }}
-                  className="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
-                >
-                  Show All
-                </button>
-              </div>
-            </section>
-
-            <section className="mb-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-              <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                <div>
-                  <h2 className="text-lg font-bold text-slate-900">
-                    Search Customers
-                  </h2>
-
-                  <p className="mt-1 text-sm text-slate-500">
-                    Search by name, phone, WhatsApp, Facebook ID, address, customer ID, or seller ID.
-                  </p>
-                </div>
-
-                <p className="text-sm font-semibold text-slate-600">
-                  Showing {getVisibleCustomers().length} of {customers.length}
-                </p>
-              </div>
-
-              <div className="mt-4 flex flex-col gap-3 md:flex-row">
-                <input
-                  value={customerSearchQuery}
-                  onChange={(event) => setCustomerSearchQuery(event.target.value)}
-                  placeholder="Search customers by name, phone, Facebook, WhatsApp, address..."
-                  className="flex-1 rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-900"
-                />
-
-                <button
-                  type="button"
-                  onClick={() => setCustomerSearchQuery("")}
-                  className="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
-                >
-                  Clear Search
-                </button>
-              </div>
-            </section>
-
-            <section className="rounded-2xl bg-white p-6 shadow-sm">
-              <h2 className="mb-5 text-xl font-bold">Customers</h2>
-
-              {customersLoading && (
-                <div className="rounded-xl bg-slate-50 p-6 text-sm text-slate-500">
-                  Loading customers...
-                </div>
-              )}
-
-              {!customersLoading && getVisibleCustomers().length === 0 && (
-                <div className="rounded-xl bg-slate-50 p-6 text-sm text-slate-500">
-                  {customerSearchQuery.trim()
-                    ? "No customers matched your search."
-                    : "No customers found."}
-                </div>
-              )}
-
-              {!customersLoading && getVisibleCustomers().length > 0 && (
-                <div className="grid gap-4 md:grid-cols-2">
-                  {getVisibleCustomers().map((customer) => (
-                    <article
-                      key={customer.id}
-                      className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
-                    >
-                      {editingCustomerId === customer.id ? (
-                        <form
-                          onSubmit={(event) =>
-                            handleEditCustomer(event, customer.id)
-                          }
-                          className="space-y-3"
-                        >
-                          <input
-                            value={editCustomerName}
-                            onChange={(event) =>
-                              setEditCustomerName(event.target.value)
-                            }
-                            placeholder="Customer name"
-                            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-slate-900"
-                            autoFocus
-                          />
-
-                          <input
-                            value={editCustomerPhone}
-                            onChange={(event) =>
-                              setEditCustomerPhone(event.target.value)
-                            }
-                            placeholder="Phone"
-                            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-slate-900"
-                          />
-
-                          <input
-                            value={editCustomerWhatsappNumber}
-                            onChange={(event) =>
-                              setEditCustomerWhatsappNumber(event.target.value)
-                            }
-                            placeholder="WhatsApp"
-                            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-slate-900"
-                          />
-
-                          <textarea
-                            value={editCustomerAddress}
-                            onChange={(event) =>
-                              setEditCustomerAddress(event.target.value)
-                            }
-                            placeholder="Address"
-                            rows={3}
-                            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-slate-900"
-                          />
-
-                          <input
-                            value={editCustomerFacebookId}
-                            onChange={(event) =>
-                              setEditCustomerFacebookId(event.target.value)
-                            }
-                            placeholder="Facebook ID"
-                            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-slate-900"
-                          />
-
-                          <div className="flex gap-2 pt-2">
-                            <button
-                              type="submit"
-                              disabled={editCustomerSubmitting}
-                              className="flex-1 rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white transition hover:bg-slate-800 disabled:opacity-60"
-                            >
-                              {editCustomerSubmitting ? "Saving..." : "Save"}
-                            </button>
-
-                            <button
-                              type="button"
-                              onClick={cancelCustomerEdit}
-                              className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-                            >
-                              Cancel
-                            </button>
-                          </div>
-                        </form>
-                      ) : (
-                        <>
-                          <h3 className="text-lg font-bold text-slate-900">
-                            {customer.name}
-                          </h3>
-
-                          <div className="mt-4 space-y-2 text-xs text-slate-500">
-                            <div className="flex items-center justify-between gap-2 rounded-lg bg-slate-50 p-2">
-                              <span className="break-all">
-                                Customer ID:{" "}
-                                <span className="font-mono">
-                                  {shortId(customer.id)}
-                                </span>
-                              </span>
-                              {renderCopyButton(customer.id, "Customer ID")}
-                            </div>
-
-                            <div className="flex items-center justify-between gap-2 rounded-lg bg-slate-50 p-2">
-                              <span className="break-all">
-                                Seller ID:{" "}
-                                <span className="font-mono">
-                                  {shortId(customer.seller_id)}
-                                </span>
-                              </span>
-                              {renderCopyButton(customer.seller_id, "Seller ID")}
-                            </div>
-                          </div>
-
-                          <div className="mt-4 space-y-2 text-sm text-slate-600">
-                            <p>
-                              <span className="font-semibold">Phone:</span>{" "}
-                              {customer.phone || "Not added"}
-                            </p>
-
-                            <p>
-                              <span className="font-semibold">WhatsApp:</span>{" "}
-                              {customer.whatsapp_number || "Not added"}
-                            </p>
-
-                            <p>
-                              <span className="font-semibold">Facebook:</span>{" "}
-                              {customer.facebook_id || "Not added"}
-                            </p>
-
-                            <p>
-                              <span className="font-semibold">Address:</span>{" "}
-                              {customer.address || "Not added"}
-                            </p>
-                          </div>
-
-                          <div className="mt-4 flex gap-2">
-                            <button
-                              type="button"
-                              onClick={() => openCustomerEditForm(customer)}
-                              className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-                            >
-                              Edit
-                            </button>
-
-                            <button
-                              type="button"
-                              onClick={() =>
-                                handleDeleteCustomer(
-                                  customer.id,
-                                  customer.name
-                                )
-                              }
-                              className="flex-1 rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-100"
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        </>
-                      )}
-                    </article>
-                  ))}
-                </div>
-              )}
-            </section>
-          </>
+          <CustomersSection sectionProps={extractedSectionProps} />
         )}
 
         {activeSection === "orders" && (
-          <>
-            {showOrderForm && (
-              <section className="mb-8 rounded-2xl bg-white p-6 shadow-sm">
-                <h2 className="text-xl font-bold">Create New Order</h2>
-
-                <p className="mt-1 text-sm text-slate-500">
-                  Global Seller ID auto-fills seller and loads dropdowns when
-                  available.
-                </p>
-
-                <form onSubmit={handleAddOrder} className="mt-6 space-y-5">
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-700">
-                      Seller ID
-                    </label>
-
-                    <div className="flex flex-col gap-3 md:flex-row">
-                      <input
-                        value={orderSellerId}
-                        onChange={(event) => {
-                          const value = event.target.value;
-                          setOrderSellerId(value);
-                          setOrderCustomerId("");
-                          setOrderProductId("");
-                          setOrderAvailableCustomers([]);
-                          setOrderAvailableProducts([]);
-                        }}
-                        placeholder="Paste seller ID"
-                        className="flex-1 rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-900"
-                      />
-
-                      <button
-                        type="button"
-                        onClick={() => fetchOrderOptionsForSeller()}
-                        disabled={orderOptionsLoading}
-                        className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-60"
-                      >
-                        {orderOptionsLoading
-                          ? "Loading..."
-                          : "Load Customers & Products"}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="grid gap-5 md:grid-cols-2">
-                    <div>
-                      <label className="mb-2 block text-sm font-medium text-slate-700">
-                        Customer
-                      </label>
-
-                      <select
-                        value={orderCustomerId}
-                        onChange={(event) =>
-                          setOrderCustomerId(event.target.value)
-                        }
-                        className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-900"
-                      >
-                        <option value="">Select customer</option>
-
-                        {orderAvailableCustomers.map((customer) => (
-                          <option key={customer.id} value={customer.id}>
-                            {customer.name}{" "}
-                            {customer.phone ? `- ${customer.phone}` : ""}
-                          </option>
-                        ))}
-                      </select>
-
-                      {orderSellerId && orderAvailableCustomers.length === 0 && (
-                        <p className="mt-2 text-xs text-slate-500">
-                          No customers loaded yet. Click Load Customers &
-                          Products.
-                        </p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="mb-2 block text-sm font-medium text-slate-700">
-                        Product
-                      </label>
-
-                      <select
-                        value={orderProductId}
-                        onChange={(event) =>
-                          setOrderProductId(event.target.value)
-                        }
-                        className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-900"
-                      >
-                        <option value="">Select product</option>
-
-                        {orderAvailableProducts.map((product) => (
-                          <option key={product.id} value={product.id}>
-                            {product.name} - {product.price} BDT
-                          </option>
-                        ))}
-                      </select>
-
-                      {orderSellerId && orderAvailableProducts.length === 0 && (
-                        <p className="mt-2 text-xs text-slate-500">
-                          No products loaded yet. Click Load Customers &
-                          Products.
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="grid gap-5 md:grid-cols-2">
-                    <input
-                      value={orderQuantity}
-                      onChange={(event) =>
-                        setOrderQuantity(event.target.value)
-                      }
-                      type="number"
-                      min="1"
-                      placeholder="Quantity"
-                      className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-900"
-                    />
-
-                    <select
-                      value={orderStatus}
-                      onChange={(event) =>
-                        setOrderStatus(event.target.value as OrderStatus)
-                      }
-                      className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-900"
-                    >
-                      {ORDER_STATUSES.map((status) => (
-                        <option key={status} value={status}>
-                          {status}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="rounded-xl bg-slate-50 p-4 text-sm text-slate-600">
-                    Total will be calculated by backend as product price ×
-                    quantity.
-                  </div>
-
-                  <div className="flex flex-col gap-3 md:flex-row">
-                    <button
-                      type="submit"
-                      disabled={orderSubmitting}
-                      className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-60"
-                    >
-                      {orderSubmitting ? "Creating..." : "Create Order"}
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setShowOrderForm(false)}
-                      className="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </form>
-              </section>
-            )}
-
-            <section className="mb-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-              <h2 className="text-lg font-bold text-slate-900">
-                Filter Orders by Seller
-              </h2>
-
-              <div className="mt-4 flex flex-col gap-3 md:flex-row">
-                <input
-                  value={filterOrderSellerId}
-                  onChange={(event) =>
-                    setFilterOrderSellerId(event.target.value)
-                  }
-                  placeholder="Paste seller ID to filter orders"
-                  className="flex-1 rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-900"
-                />
-
-                <button
-                  type="button"
-                  onClick={() => fetchOrders(filterOrderSellerId)}
-                  className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
-                >
-                  Apply Filter
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setFilterOrderSellerId("");
-                    setOrderStatusFilter("all");
-                    fetchOrders("");
-                  }}
-                  className="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
-                >
-                  Show All
-                </button>
-
-                <select
-                  value={orderStatusFilter}
-                  onChange={(event) =>
-                    setOrderStatusFilter(event.target.value as OrderStatus | "all")
-                  }
-                  className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 outline-none transition focus:border-slate-900"
-                  aria-label="Filter by status"
-                >
-                  <option value="all">All statuses</option>
-                  {ORDER_STATUSES.map((status) => (
-                    <option key={status} value={status}>
-                      {status}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </section>
-
-            {(orderDetail || orderDetailLoading) && (
-              <section className="mb-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <h2 className="text-xl font-bold">Order Detail</h2>
-                    <p className="mt-1 text-sm text-slate-500">
-                      Detail data comes from backend order detail API.
-                    </p>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => setOrderDetail(null)}
-                    className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
-                  >
-                    Close
-                  </button>
-                </div>
-
-                {orderDetailLoading && (
-                  <div className="mt-4 rounded-xl bg-slate-50 p-4 text-sm text-slate-500">
-                    Loading order detail...
-                  </div>
-                )}
-
-                {!orderDetailLoading && orderDetail && (
-                  <div className="mt-5 grid gap-4 md:grid-cols-3">
-                    <div className="rounded-xl bg-slate-50 p-4">
-                      <p className="text-xs font-semibold uppercase text-slate-500">
-                        Order
-                      </p>
-
-                      <div className="mt-2 flex items-center justify-between gap-2 text-sm text-slate-700">
-                        <span className="break-all font-mono">
-                          {shortId(orderDetail.order_id)}
-                        </span>
-                        {renderCopyButton(orderDetail.order_id, "Order ID")}
-                      </div>
-
-                      <p className="mt-2 text-sm text-slate-700">
-                        Status:{" "}
-                        <span className="font-semibold">
-                          {orderDetail.status}
-                        </span>
-                      </p>
-
-                      <p className="mt-1 text-sm text-slate-700">
-                        Quantity: {orderDetail.quantity}
-                      </p>
-
-                      <p className="mt-1 text-sm text-slate-700">
-                        Total:{" "}
-                        <span className="font-semibold">
-                          {formatTaka(orderDetail.total)}
-                        </span>
-                      </p>
-                    </div>
-
-                    <div className="rounded-xl bg-slate-50 p-4">
-                      <p className="text-xs font-semibold uppercase text-slate-500">
-                        Customer
-                      </p>
-
-                      <p className="mt-2 text-sm font-semibold text-slate-800">
-                        {orderDetail.customer?.name || "Not found"}
-                      </p>
-
-                      {orderDetail.customer?.id && (
-                        <div className="mt-2 flex items-center justify-between gap-2 text-xs text-slate-600">
-                          <span className="font-mono">
-                            {shortId(orderDetail.customer.id)}
-                          </span>
-                          {renderCopyButton(
-                            orderDetail.customer.id,
-                            "Customer ID"
-                          )}
-                        </div>
-                      )}
-
-                      <p className="mt-2 text-sm text-slate-700">
-                        Phone: {orderDetail.customer?.phone || "Not added"}
-                      </p>
-
-                      <p className="mt-1 text-sm text-slate-700">
-                        Address: {orderDetail.customer?.address || "Not added"}
-                      </p>
-                    </div>
-
-                    <div className="rounded-xl bg-slate-50 p-4">
-                      <p className="text-xs font-semibold uppercase text-slate-500">
-                        Product
-                      </p>
-
-                      <p className="mt-2 text-sm font-semibold text-slate-800">
-                        {orderDetail.product?.name || "Not found"}
-                      </p>
-
-                      {orderDetail.product?.id && (
-                        <div className="mt-2 flex items-center justify-between gap-2 text-xs text-slate-600">
-                          <span className="font-mono">
-                            {shortId(orderDetail.product.id)}
-                          </span>
-                          {renderCopyButton(
-                            orderDetail.product.id,
-                            "Product ID"
-                          )}
-                        </div>
-                      )}
-
-                      <p className="mt-2 text-sm text-slate-700">
-                        Price: {formatTaka(orderDetail.product?.price)}
-                      </p>
-
-                      <p className="mt-1 text-sm text-slate-700">
-                        Seller:{" "}
-                        {orderDetail.seller?.name ||
-                          orderDetail.seller?.id ||
-                          "Not found"}
-                      </p>
-
-                      {orderDetail.seller?.id && (
-                        <div className="mt-2 flex items-center justify-between gap-2 text-xs text-slate-600">
-                          <span className="font-mono">
-                            {shortId(orderDetail.seller.id)}
-                          </span>
-                          {renderCopyButton(orderDetail.seller.id, "Seller ID")}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </section>
-            )}
-
-            <section className="rounded-2xl bg-white p-6 shadow-sm">
-              <h2 className="mb-5 text-xl font-bold">Orders</h2>
-
-              {ordersLoading && (
-                <div className="rounded-xl bg-slate-50 p-6 text-sm text-slate-500">
-                  Loading orders...
-                </div>
-              )}
-
-              {!ordersLoading && getVisibleOrders().length === 0 && (
-                <div className="rounded-xl bg-slate-50 p-6 text-sm text-slate-500">
-                  No orders found.
-                </div>
-              )}
-
-              {!ordersLoading && getVisibleOrders().length > 0 && (
-                <div className="space-y-4">
-                  {getVisibleOrders().map((order) => (
-                    <article
-                      key={order.id}
-                      className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
-                    >
-                      {editingOrderId === order.id ? (
-                        <form
-                          onSubmit={(event) =>
-                            handleEditOrder(event, order.id)
-                          }
-                          className="space-y-4"
-                        >
-                          <div className="rounded-xl bg-slate-50 p-4 text-sm text-slate-600">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <span>Editing order for seller:</span>
-                              <span className="font-mono font-semibold">
-                                {shortId(editOrderSellerId)}
-                              </span>
-                              {editOrderSellerId &&
-                                renderCopyButton(editOrderSellerId, "Seller ID")}
-                            </div>
-
-                            <button
-                              type="button"
-                              onClick={() =>
-                                fetchEditOrderOptionsForSeller(
-                                  editOrderSellerId
-                                )
-                              }
-                              disabled={editOrderOptionsLoading}
-                              className="mt-3 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 disabled:opacity-60"
-                            >
-                              {editOrderOptionsLoading
-                                ? "Loading dropdowns..."
-                                : "Reload Customer/Product Dropdowns"}
-                            </button>
-                          </div>
-
-                          <div className="grid gap-3 md:grid-cols-2">
-                            <div>
-                              <label className="mb-1 block text-xs font-medium text-slate-600">
-                                Customer
-                              </label>
-
-                              <select
-                                value={editOrderCustomerId}
-                                onChange={(event) =>
-                                  setEditOrderCustomerId(event.target.value)
-                                }
-                                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-slate-900"
-                              >
-                                <option value="">Select customer</option>
-
-                                {editOrderAvailableCustomers.map((customer) => (
-                                  <option key={customer.id} value={customer.id}>
-                                    {customer.name}{" "}
-                                    {customer.phone
-                                      ? `- ${customer.phone}`
-                                      : ""}
-                                  </option>
-                                ))}
-                              </select>
-
-                              {editOrderAvailableCustomers.length === 0 && (
-                                <p className="mt-1 text-xs text-slate-500">
-                                  No customers loaded. Click reload dropdowns.
-                                </p>
-                              )}
-                            </div>
-
-                            <div>
-                              <label className="mb-1 block text-xs font-medium text-slate-600">
-                                Product
-                              </label>
-
-                              <select
-                                value={editOrderProductId}
-                                onChange={(event) =>
-                                  setEditOrderProductId(event.target.value)
-                                }
-                                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-slate-900"
-                              >
-                                <option value="">Select product</option>
-
-                                {editOrderAvailableProducts.map((product) => (
-                                  <option key={product.id} value={product.id}>
-                                    {product.name} - {product.price} BDT
-                                  </option>
-                                ))}
-                              </select>
-
-                              {editOrderAvailableProducts.length === 0 && (
-                                <p className="mt-1 text-xs text-slate-500">
-                                  No products loaded. Click reload dropdowns.
-                                </p>
-                              )}
-                            </div>
-                          </div>
-
-                          <div className="grid gap-3 md:grid-cols-2">
-                            <div>
-                              <label className="mb-1 block text-xs font-medium text-slate-600">
-                                Quantity
-                              </label>
-
-                              <input
-                                value={editOrderQuantity}
-                                onChange={(event) =>
-                                  setEditOrderQuantity(event.target.value)
-                                }
-                                type="number"
-                                min="1"
-                                placeholder="Quantity"
-                                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-slate-900"
-                              />
-                            </div>
-
-                            <div>
-                              <label className="mb-1 block text-xs font-medium text-slate-600">
-                                Status
-                              </label>
-
-                              <select
-                                value={editOrderStatus}
-                                onChange={(event) =>
-                                  setEditOrderStatus(
-                                    event.target.value as OrderStatus
-                                  )
-                                }
-                                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-slate-900"
-                              >
-                                {ORDER_STATUSES.map((status) => (
-                                  <option key={status} value={status}>
-                                    {status}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
-                          </div>
-
-                          <div className="rounded-lg bg-slate-50 p-3 text-xs text-slate-500">
-                            If product or quantity changes, backend will
-                            recalculate total.
-                          </div>
-
-                          <div className="flex gap-2 pt-2">
-                            <button
-                              type="submit"
-                              disabled={editOrderSubmitting}
-                              className="flex-1 rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white transition hover:bg-slate-800 disabled:opacity-60"
-                            >
-                              {editOrderSubmitting ? "Saving..." : "Save"}
-                            </button>
-
-                            <button
-                              type="button"
-                              onClick={cancelOrderEdit}
-                              className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-                            >
-                              Cancel
-                            </button>
-                          </div>
-                        </form>
-                      ) : (
-                        <>
-                          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                            <div>
-                              <div className="flex flex-wrap items-center gap-3">
-                                <h3 className="text-lg font-bold text-slate-900">
-                                  Order #{shortId(order.id)}
-                                </h3>
-
-                                <span
-                                  className={`rounded-full px-3 py-1 text-xs font-bold capitalize ring-1 ${getStatusBadgeClass(
-                                    order.status
-                                  )}`}
-                                >
-                                  {order.status}
-                                </span>
-                              </div>
-
-                              <div className="mt-2 space-y-2 text-sm text-slate-600">
-                                <div className="flex flex-wrap items-center gap-2">
-                                  <span>Order ID:</span>
-                                  <span className="font-mono">
-                                    {shortId(order.id)}
-                                  </span>
-                                  {renderCopyButton(order.id, "Order ID")}
-                                </div>
-
-                                <div className="flex flex-wrap items-center gap-2">
-                                  <span>Seller ID:</span>
-                                  <span className="font-mono">
-                                    {shortId(order.seller_id)}
-                                  </span>
-                                  {renderCopyButton(order.seller_id, "Seller ID")}
-                                </div>
-
-                                <div className="flex flex-wrap items-center gap-2">
-                                  <span>Customer:</span>
-                                  <span className="font-semibold">
-                                    {getCustomerName(order.customer_id)}
-                                  </span>
-                                  {renderCopyButton(
-                                    order.customer_id,
-                                    "Customer ID"
-                                  )}
-                                </div>
-
-                                <p className="text-sm text-slate-500">
-                                  Customer phone: {getCustomerPhone(order.customer_id)}
-                                </p>
-
-                                <div className="flex flex-wrap items-center gap-2">
-                                  <span>Product:</span>
-                                  <span className="font-semibold">
-                                    {getProductName(order.product_id)}
-                                  </span>
-                                  {renderCopyButton(
-                                    order.product_id,
-                                    "Product ID"
-                                  )}
-                                </div>
-
-                                <p className="text-sm text-slate-500">
-                                  Product price: {formatTaka(getProductPrice(order.product_id))}
-                                </p>
-
-                                <p>Quantity: {order.quantity}</p>
-
-                                <p>
-                                  Total:{" "}
-                                  <span className="font-bold text-slate-900">
-                                    {formatTaka(order.total)}
-                                  </span>
-                                </p>
-                              </div>
-                            </div>
-
-                            <div className="min-w-[180px]">
-                              <label className="mb-2 block text-xs font-semibold uppercase text-slate-500">
-                                Status
-                              </label>
-
-                              <select
-                                value={order.status}
-                                onChange={(event) =>
-                                  handleQuickStatusUpdate(
-                                    order,
-                                    event.target.value as OrderStatus
-                                  )
-                                }
-                                className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold outline-none transition focus:border-slate-900"
-                              >
-                                {ORDER_STATUSES.map((status) => (
-                                  <option key={status} value={status}>
-                                    {status}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
-                          </div>
-
-                          <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-                            <button
-                              type="button"
-                              onClick={() => fetchOrderDetail(order.id)}
-                              className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-                            >
-                              View Detail
-                            </button>
-
-                            <button
-                              type="button"
-                              onClick={() => openOrderEditForm(order)}
-                              className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-                            >
-                              Edit
-                            </button>
-
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteOrder(order.id)}
-                              className="flex-1 rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-100"
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        </>
-                      )}
-                    </article>
-                  ))}
-                </div>
-              )}
-            </section>
-          </>
+          <OrdersSection sectionProps={extractedSectionProps} />
         )}
 
         {activeSection === "plan" && (
-          <>
-            <section className="mb-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-              <h2 className="text-xl font-bold text-slate-900">
-                Plan Management
-              </h2>
-
-              <p className="mt-1 text-sm text-slate-500">
-                Seller ID is synced from Global Seller ID. You can still change
-                it manually here.
-              </p>
-
-              <div className="mt-5 flex flex-col gap-3 md:flex-row">
-                <input
-                  value={planSellerId}
-                  onChange={(event) => {
-                    setPlanSellerId(event.target.value);
-                    setSellerPlanData(null);
-                  }}
-                  placeholder="Paste seller ID to check or change plan"
-                  className="flex-1 rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-900"
-                />
-
-                <button
-                  type="button"
-                  onClick={() => fetchPlanForSeller()}
-                  disabled={planLoading}
-                  className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-60"
-                >
-                  {planLoading ? "Loading..." : "Load Plan"}
-                </button>
-              </div>
-            </section>
-
-            {sellerPlanData && (
-              <section className="mb-8 grid gap-4 md:grid-cols-5">
-                <div className="rounded-2xl bg-white p-5 shadow-sm">
-                  <p className="text-sm text-slate-500">Current Plan</p>
-                  <h2 className="mt-2 text-3xl font-bold capitalize">
-                    {sellerPlanData.plan}
-                  </h2>
-                </div>
-
-                <div className="rounded-2xl bg-white p-5 shadow-sm">
-                  <p className="text-sm text-slate-500">Product Limit</p>
-                  <h2 className="mt-2 text-2xl font-bold">
-                    {sellerPlanData.product_limit}
-                  </h2>
-                </div>
-
-                <div className="rounded-2xl bg-white p-5 shadow-sm">
-                  <p className="text-sm text-slate-500">Current Products</p>
-                  <h2 className="mt-2 text-3xl font-bold">
-                    {sellerPlanData.current_product_count}
-                  </h2>
-                </div>
-
-                <div className="rounded-2xl bg-white p-5 shadow-sm">
-                  <p className="text-sm text-slate-500">Remaining Products</p>
-                  <h2 className="mt-2 text-2xl font-bold">
-                    {sellerPlanData.remaining_products}
-                  </h2>
-                </div>
-
-                <div className="rounded-2xl bg-white p-5 shadow-sm">
-                  <p className="text-sm text-slate-500">Image Limit</p>
-                  <h2 className="mt-2 text-2xl font-bold">
-                    {getImageLimitByPlan(sellerPlanData.plan)}
-                  </h2>
-                  <p className="mt-1 text-xs text-slate-500">per product</p>
-                </div>
-              </section>
-            )}
-
-            {sellerPlanData && (
-              <section className="mb-8 rounded-2xl bg-white p-6 shadow-sm">
-                <h2 className="text-xl font-bold text-slate-900">
-                  Seller Info
-                </h2>
-
-                <div className="mt-4 grid gap-4 md:grid-cols-3">
-                  <div className="rounded-xl bg-slate-50 p-4">
-                    <p className="text-xs font-semibold uppercase text-slate-500">
-                      Seller ID
-                    </p>
-
-                    <div className="mt-2 flex items-center justify-between gap-2">
-                      <p className="break-all font-mono text-sm text-slate-700">
-                        {shortId(sellerPlanData.seller_id)}
-                      </p>
-                      {renderCopyButton(sellerPlanData.seller_id, "Seller ID")}
-                    </div>
-                  </div>
-
-                  <div className="rounded-xl bg-slate-50 p-4">
-                    <p className="text-xs font-semibold uppercase text-slate-500">
-                      Name
-                    </p>
-
-                    <p className="mt-2 text-sm font-semibold text-slate-800">
-                      {sellerPlanData.name || "Not added"}
-                    </p>
-                  </div>
-
-                  <div className="rounded-xl bg-slate-50 p-4">
-                    <p className="text-xs font-semibold uppercase text-slate-500">
-                      Phone
-                    </p>
-
-                    <p className="mt-2 text-sm font-semibold text-slate-800">
-                      {sellerPlanData.phone || "Not added"}
-                    </p>
-                  </div>
-                </div>
-              </section>
-            )}
-
-            <section className="rounded-2xl bg-white p-6 shadow-sm">
-              <div className="mb-5">
-                <h2 className="text-xl font-bold text-slate-900">
-                  Upgrade Options
-                </h2>
-
-                <p className="mt-1 text-sm text-slate-500">
-                  Change seller plan for MVP/admin testing. No payment will be
-                  charged.
-                </p>
-
-                {!isPlanSellerLoaded() && (
-                  <div className="mt-4 rounded-xl bg-yellow-50 p-4 text-sm font-semibold text-yellow-800 ring-1 ring-yellow-100">
-                    Load a valid seller first. Plan buttons are disabled until the seller exists.
-                  </div>
-                )}
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-3">
-                {PLAN_OPTIONS.map((plan) => {
-                  const isCurrentPlan = sellerPlanData?.plan === plan.id;
-
-                  return (
-                    <article
-                      key={plan.id}
-                      className={`rounded-2xl border p-5 shadow-sm ${
-                        isCurrentPlan
-                          ? "border-slate-900 bg-slate-50"
-                          : "border-slate-200 bg-white"
-                      }`}
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <h3 className="text-xl font-bold text-slate-900">
-                            {plan.name}
-                          </h3>
-
-                          <p className="mt-1 text-2xl font-bold text-slate-950">
-                            {plan.price}
-                          </p>
-                        </div>
-
-                        {isCurrentPlan && (
-                          <span className="rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white">
-                            Current
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="mt-5 space-y-2 text-sm text-slate-600">
-                        <p>
-                          <span className="font-semibold text-slate-800">
-                            Product limit:
-                          </span>{" "}
-                          {plan.productLimit}
-                        </p>
-
-                        <p>
-                          <span className="font-semibold text-slate-800">
-                            Image limit:
-                          </span>{" "}
-                          {plan.imageLimit}
-                        </p>
-
-                        <p className="pt-2 text-slate-500">
-                          {plan.description}
-                        </p>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => handleChangeSellerPlan(plan.id)}
-                        disabled={planUpdating || !isPlanSellerLoaded()}
-                        className={`mt-5 w-full rounded-xl px-5 py-3 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${
-                          isCurrentPlan
-                            ? "border border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
-                            : "bg-slate-900 text-white hover:bg-slate-800"
-                        }`}
-                      >
-                        {planUpdating
-                          ? "Updating..."
-                          : isCurrentPlan
-                          ? "Current Plan"
-                          : `Change to ${plan.name}`}
-                      </button>
-                    </article>
-                  );
-                })}
-              </div>
-            </section>
-          </>
+          <PlanSection
+            planSellerId={planSellerId}
+            setPlanSellerId={setPlanSellerId}
+            sellerPlanData={sellerPlanData}
+            setSellerPlanData={setSellerPlanData}
+            planLoading={planLoading}
+            planUpdating={planUpdating}
+            fetchPlanForSeller={fetchPlanForSeller}
+            handleChangeSellerPlan={handleChangeSellerPlan}
+            isPlanSellerLoaded={isPlanSellerLoaded}
+            getImageLimitByPlan={getImageLimitByPlan}
+            PLAN_OPTIONS={PLAN_OPTIONS}
+            shortId={shortId}
+            renderCopyButton={renderCopyButton}
+          />
         )}
       </div>
     </main>
