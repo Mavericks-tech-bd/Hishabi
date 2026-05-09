@@ -1,7 +1,22 @@
 "use client";
 
+type ProductImage = {
+  id: string;
+  product_id: string;
+  seller_id: string;
+  image_url: string;
+  storage_path?: string | null;
+};
+
 type ProductsSectionProps = {
   products: any[];
+  productImagesByProductId: Record<string, ProductImage[]>;
+  productImagesLoadingByProductId: Record<string, boolean>;
+  handleDeleteProductImage: (
+    imageId: string,
+    productId: string,
+    productName: string
+  ) => Promise<void>;
   activeGlobalSellerId: string;
   productsLoading: boolean;
   showProductForm: boolean;
@@ -46,6 +61,9 @@ type ProductsSectionProps = {
 
 export default function ProductsSection({
   products,
+  productImagesByProductId,
+  productImagesLoadingByProductId,
+  handleDeleteProductImage,
   activeGlobalSellerId,
   productsLoading,
   showProductForm,
@@ -323,17 +341,26 @@ export default function ProductsSection({
 
               {!productsLoading && getVisibleProducts().length > 0 && (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {getVisibleProducts().map((product) => (
+                  {getVisibleProducts().map((product) => {
+                    const productImages = productImagesByProductId[product.id];
+                    const isImagesLoaded = Array.isArray(productImages);
+                    const visibleImages = productImages || [];
+                    const primaryImageUrl = isImagesLoaded
+                      ? visibleImages[0]?.image_url
+                      : product.image_url;
+                    const isImagesLoading =
+                      productImagesLoadingByProductId[product.id];
+
+                    return (
                     <article
                       key={product.id}
                       className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
                     >
                       <div className="h-48 bg-slate-100">
-                        {product.image_url &&
-                        product.image_url.startsWith("http") ? (
+                        {primaryImageUrl && primaryImageUrl.startsWith("http") ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
-                            src={product.image_url}
+                            src={primaryImageUrl}
                             alt={product.name}
                             className="h-full w-full object-cover"
                           />
@@ -399,6 +426,61 @@ export default function ProductsSection({
                               {product.price} BDT
                             </p>
 
+                            <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3">
+                              <div className="mb-3 flex items-center justify-between gap-2">
+                                <p className="text-sm font-semibold text-slate-800">
+                                  Product images
+                                </p>
+                                <p className="text-xs text-slate-500">
+                                  {isImagesLoading
+                                    ? "Loading..."
+                                    : `${visibleImages.length} image${
+                                        visibleImages.length === 1 ? "" : "s"
+                                      }`}
+                                </p>
+                              </div>
+
+                              {visibleImages.length > 0 ? (
+                                <div className="grid grid-cols-2 gap-3">
+                                  {visibleImages.map((image) => (
+                                    <div
+                                      key={image.id}
+                                      className="overflow-hidden rounded-xl border border-slate-200 bg-white"
+                                    >
+                                      <div className="h-24 bg-slate-100">
+                                        {image.image_url?.startsWith("http") && (
+                                          // eslint-disable-next-line @next/next/no-img-element
+                                          <img
+                                            src={image.image_url}
+                                            alt={product.name}
+                                            className="h-full w-full object-cover"
+                                          />
+                                        )}
+                                      </div>
+
+                                      <button
+                                        type="button"
+                                        onClick={() =>
+                                          handleDeleteProductImage(
+                                            image.id,
+                                            product.id,
+                                            product.name
+                                          )
+                                        }
+                                        className="w-full px-2 py-2 text-xs font-semibold text-red-600 transition hover:bg-red-50"
+                                      >
+                                        Delete image
+                                      </button>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <p className="rounded-lg bg-white p-3 text-sm text-slate-500">
+                                  No extra images saved for this product yet.
+                                </p>
+                              )}
+                            </div>
+
                             <div className="mt-4 space-y-2 text-xs text-slate-500">
                               <div className="flex items-center justify-between gap-2 rounded-lg bg-slate-50 p-2">
                                 <span className="break-all">
@@ -444,7 +526,8 @@ export default function ProductsSection({
                         )}
                       </div>
                     </article>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </section>

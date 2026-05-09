@@ -6,6 +6,14 @@ export type Product = {
   image_url?: string | null;
 };
 
+export type ProductImage = {
+  id: string;
+  product_id: string;
+  seller_id: string;
+  image_url: string;
+  storage_path?: string | null;
+};
+
 export type Customer = {
   id: string;
   seller_id: string;

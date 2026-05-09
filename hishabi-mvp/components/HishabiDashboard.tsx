@@ -17,6 +17,7 @@ import type {
   OrderDetail,
   OrderStatus,
   Product,
+  ProductImage,
   SellerPlanData,
 } from "@/types";
 
@@ -98,6 +99,11 @@ export default function HishabiDashboard() {
   // Products
 
   const [products, setProducts] = useState<Product[]>([]);
+  const [productImagesByProductId, setProductImagesByProductId] = useState<
+    Record<string, ProductImage[]>
+  >({});
+  const [productImagesLoadingByProductId, setProductImagesLoadingByProductId] =
+    useState<Record<string, boolean>>({});
   const [productsLoading, setProductsLoading] = useState(true);
   const [showProductForm, setShowProductForm] = useState(false);
   const [productSubmitting, setProductSubmitting] = useState(false);
@@ -247,17 +253,116 @@ export default function HishabiDashboard() {
 
       if (!response.ok) {
         setProducts([]);
+        setProductImagesByProductId({});
         setMessage(getApiErrorMessage(result, "Could not load products from backend."));
         return;
       }
 
-      setProducts(result?.data || []);
+      const loadedProducts = result?.data || [];
+      setProducts(loadedProducts);
+      await fetchProductImagesForProducts(loadedProducts);
     } catch (error) {
       console.error("Failed to fetch products:", error);
       setProducts([]);
+      setProductImagesByProductId({});
       setMessage("Could not load products from backend.");
     } finally {
       setProductsLoading(false);
+    }
+  }
+
+  async function fetchProductImages(productId: string) {
+    try {
+      setProductImagesLoadingByProductId((current) => ({
+        ...current,
+        [productId]: true,
+      }));
+
+      const response = await fetch(
+        `${API_BASE_URL}/products/${productId}/images`
+      );
+      const result = await safeJson(response);
+
+      if (!response.ok) {
+        setMessage(getApiErrorMessage(result, "Failed to load product images."));
+        setProductImagesByProductId((current) => ({
+          ...current,
+          [productId]: [],
+        }));
+        return;
+      }
+
+      setProductImagesByProductId((current) => ({
+        ...current,
+        [productId]: result?.data || [],
+      }));
+    } catch (error) {
+      console.error("Failed to load product images:", error);
+      setProductImagesByProductId((current) => ({
+        ...current,
+        [productId]: [],
+      }));
+    } finally {
+      setProductImagesLoadingByProductId((current) => ({
+        ...current,
+        [productId]: false,
+      }));
+    }
+  }
+
+  async function fetchProductImagesForProducts(productsToLoad: Product[]) {
+    const imageMap: Record<string, ProductImage[]> = {};
+
+    await Promise.all(
+      productsToLoad.map(async (product) => {
+        try {
+          const response = await fetch(
+            `${API_BASE_URL}/products/${product.id}/images`
+          );
+          const result = await safeJson(response);
+
+          imageMap[product.id] = response.ok ? result?.data || [] : [];
+        } catch (error) {
+          console.error("Failed to load images for product:", product.id, error);
+          imageMap[product.id] = [];
+        }
+      })
+    );
+
+    setProductImagesByProductId(imageMap);
+  }
+
+  async function handleDeleteProductImage(
+    imageId: string,
+    productId: string,
+    productName: string
+  ) {
+    const confirmDelete = window.confirm(
+      `Delete this image from "${productName}"?`
+    );
+
+    if (!confirmDelete) {
+      return;
+    }
+
+    try {
+      setMessage("");
+
+      const response = await fetch(`${API_BASE_URL}/product-images/${imageId}`, {
+        method: "DELETE",
+      });
+      const result = await safeJson(response);
+
+      if (!response.ok) {
+        setMessage(getApiErrorMessage(result, "Failed to delete product image."));
+        return;
+      }
+
+      setMessage("Product image deleted successfully.");
+      await fetchProductImages(productId);
+    } catch (error) {
+      console.error("Failed to delete product image:", error);
+      setMessage("Something went wrong while deleting product image.");
     }
   }
 
@@ -2161,6 +2266,9 @@ export default function HishabiDashboard() {
         {activeSection === "products" && (
           <ProductsSection
             products={products}
+            productImagesByProductId={productImagesByProductId}
+            productImagesLoadingByProductId={productImagesLoadingByProductId}
+            handleDeleteProductImage={handleDeleteProductImage}
             activeGlobalSellerId={activeGlobalSellerId}
             productsLoading={productsLoading}
             showProductForm={showProductForm}
