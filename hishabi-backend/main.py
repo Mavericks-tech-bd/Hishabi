@@ -557,7 +557,7 @@ async def upload_product_images(
 
 @app.delete("/product-images/{image_id}")
 def delete_product_image(image_id: str):
-    cleaned_image_id = validate_required_id(image_id, "Image ID")
+    cleaned_image_id = validate_uuid_id(image_id, "Image ID")
 
     image_response = (
         supabase
@@ -574,6 +574,7 @@ def delete_product_image(image_id: str):
         )
 
     image = image_response.data[0]
+    product_id = image["product_id"]
 
     supabase.storage.from_("product-images").remove(
         [
@@ -589,7 +590,34 @@ def delete_product_image(image_id: str):
         .execute()
     )
 
-    return {"data": response.data}
+    remaining_images_response = (
+        supabase
+        .table("product_images")
+        .select("image_url")
+        .eq("product_id", product_id)
+        .execute()
+    )
+
+    remaining_images = remaining_images_response.data or []
+    next_image_url = remaining_images[0]["image_url"] if remaining_images else None
+
+    (
+        supabase
+        .table("products")
+        .update(
+            {
+                "image_url": next_image_url,
+            }
+        )
+        .eq("id", product_id)
+        .execute()
+    )
+
+    return {
+        "message": "Product image deleted successfully",
+        "data": response.data,
+        "next_image_url": next_image_url,
+    }
 
 
 @app.post("/products")

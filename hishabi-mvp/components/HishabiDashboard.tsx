@@ -360,6 +360,7 @@ export default function HishabiDashboard() {
 
       setMessage("Product image deleted successfully.");
       await fetchProductImages(productId);
+      await fetchProducts(filterSellerId || activeGlobalSellerId);
     } catch (error) {
       console.error("Failed to delete product image:", error);
       setMessage("Something went wrong while deleting product image.");

@@ -467,7 +467,7 @@ export default function ProductsSection({
                                             product.name
                                           )
                                         }
-                                        className="w-full px-2 py-2 text-xs font-semibold text-red-600 transition hover:bg-red-50"
+                                        className="min-h-10 w-full px-2 py-2 text-xs font-semibold text-red-600 transition hover:bg-red-50"
                                       >
                                         Delete image
                                       </button>
