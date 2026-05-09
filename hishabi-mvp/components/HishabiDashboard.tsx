@@ -68,6 +68,10 @@ function formatTaka(value?: number | null) {
   return `${value} BDT`;
 }
 
+function getConnectionErrorMessage(action: string) {
+  return `Could not ${action}. Please make sure the backend is running at ${API_BASE_URL}.`;
+}
+
 function shortId(id?: string | null) {
   if (!id) {
     return "N/A";
@@ -358,12 +362,12 @@ export default function HishabiDashboard() {
         return;
       }
 
-      setMessage("Product image deleted successfully.");
+      setMessage("Product image deleted successfully. The product main image has been refreshed.");
       await fetchProductImages(productId);
       await fetchProducts(filterSellerId || activeGlobalSellerId);
     } catch (error) {
       console.error("Failed to delete product image:", error);
-      setMessage("Something went wrong while deleting product image.");
+      setMessage(getConnectionErrorMessage("delete product image"));
     }
   }
 
@@ -451,7 +455,7 @@ export default function HishabiDashboard() {
       setDashboardSummary(result?.data || null);
     } catch (error) {
       console.error("Failed to load dashboard summary:", error);
-      setMessage("Something went wrong while loading dashboard summary.");
+      setMessage(getConnectionErrorMessage("load dashboard summary"));
     } finally {
       setDashboardLoading(false);
     }
@@ -494,7 +498,7 @@ export default function HishabiDashboard() {
     const trimmedSellerId = currentSellerId.trim();
 
     if (!trimmedSellerId) {
-      setMessage("Please enter a seller ID first.");
+      setMessage("Please enter or apply a Seller ID first.");
       return;
     }
 
@@ -531,7 +535,7 @@ export default function HishabiDashboard() {
     setOrderProductId("");
 
     if (!trimmedSellerId) {
-      setMessage("Please enter a seller ID first.");
+      setMessage("Please enter or apply a Seller ID first.");
       return;
     }
 
@@ -633,7 +637,7 @@ export default function HishabiDashboard() {
     const trimmedSellerId = currentSellerId.trim();
 
     if (!trimmedSellerId) {
-      setMessage("Please enter a seller ID first.");
+      setMessage("Please enter or apply a Seller ID first.");
       return;
     }
 
@@ -746,7 +750,7 @@ export default function HishabiDashboard() {
     const trimmedSellerId = globalSellerId.trim();
 
     if (!trimmedSellerId) {
-      setMessage("Please enter a seller ID first.");
+      setMessage("Please enter or apply a Seller ID first.");
       return;
     }
 
@@ -970,7 +974,7 @@ export default function HishabiDashboard() {
         throw new Error(result.detail);
       }
 
-      throw new Error("Image upload failed.");
+      throw new Error("Image upload failed. Please check that the file is an image and the backend is running.");
     }
   }
 
@@ -979,12 +983,12 @@ export default function HishabiDashboard() {
     setMessage("");
 
     if (!sellerId.trim() || !productName.trim() || !productPrice) {
-      setMessage("Seller ID, product name, and price are required.");
+      setMessage("Seller ID, product name, and price are required. Apply a Global Seller ID first, then enter product name and price.");
       return;
     }
 
     if (!isValidPositiveNumber(productPrice)) {
-      setMessage("Product price must be a valid number greater than 0.");
+      setMessage("Product price must be a valid number greater than 0. Example: 500");
       return;
     }
 
@@ -1106,7 +1110,7 @@ export default function HishabiDashboard() {
       await fetchDashboardSummary(dashboardSellerId || activeGlobalSellerId);
     } catch (error) {
       console.error("Failed to delete product:", error);
-      setMessage("Something went wrong while deleting product.");
+      setMessage(getConnectionErrorMessage("delete product"));
     }
   }
 
@@ -1184,7 +1188,7 @@ export default function HishabiDashboard() {
       await fetchDashboardSummary(dashboardSellerId || activeGlobalSellerId);
     } catch (error) {
       console.error("Failed to update product:", error);
-      setMessage("Something went wrong while updating product.");
+      setMessage(getConnectionErrorMessage("update product"));
     } finally {
       setEditProductSubmitting(false);
     }
@@ -1249,7 +1253,7 @@ export default function HishabiDashboard() {
       }
     } catch (error) {
       console.error("Failed to create customer:", error);
-      setMessage("Something went wrong while creating customer.");
+      setMessage(getConnectionErrorMessage("create customer"));
     } finally {
       setCustomerSubmitting(false);
     }
@@ -1286,7 +1290,7 @@ export default function HishabiDashboard() {
       await fetchDashboardSummary(dashboardSellerId || activeGlobalSellerId);
     } catch (error) {
       console.error("Failed to delete customer:", error);
-      setMessage("Something went wrong while deleting customer.");
+      setMessage(getConnectionErrorMessage("delete customer"));
     }
   }
 
@@ -1322,7 +1326,7 @@ export default function HishabiDashboard() {
     setMessage("");
 
     if (!editCustomerName.trim()) {
-      setMessage("Customer name cannot be empty.");
+      setMessage("Customer name cannot be empty. Please enter the customer's name before saving.");
       return;
     }
 
@@ -1371,7 +1375,7 @@ export default function HishabiDashboard() {
       await fetchDashboardSummary(dashboardSellerId || activeGlobalSellerId);
     } catch (error) {
       console.error("Failed to update customer:", error);
-      setMessage("Something went wrong while updating customer.");
+      setMessage(getConnectionErrorMessage("update customer"));
     } finally {
       setEditCustomerSubmitting(false);
     }
@@ -1393,12 +1397,12 @@ export default function HishabiDashboard() {
       !orderCustomerId.trim() ||
       !orderProductId.trim()
     ) {
-      setMessage("Seller ID, customer, and product are required.");
+      setMessage("Seller ID, customer, and product are required. Apply a Global Seller ID first, then select customer and product.");
       return;
     }
 
     if (!orderQuantity || !isValidPositiveNumber(orderQuantity)) {
-      setMessage("Quantity must be a valid number greater than 0.");
+      setMessage("Quantity must be a valid number greater than 0. Example: 1");
       return;
     }
 
@@ -1434,7 +1438,7 @@ export default function HishabiDashboard() {
       await fetchDashboardSummary(dashboardSellerId || activeGlobalSellerId);
     } catch (error) {
       console.error("Failed to create order:", error);
-      setMessage("Something went wrong while creating order.");
+      setMessage(getConnectionErrorMessage("create order"));
     } finally {
       setOrderSubmitting(false);
     }
@@ -1475,7 +1479,7 @@ export default function HishabiDashboard() {
       await fetchDashboardSummary(dashboardSellerId || activeGlobalSellerId);
     } catch (error) {
       console.error("Failed to delete order:", error);
-      setMessage("Something went wrong while deleting order.");
+      setMessage(getConnectionErrorMessage("delete order"));
     }
   }
 
@@ -1515,12 +1519,12 @@ export default function HishabiDashboard() {
     setMessage("");
 
     if (!editOrderCustomerId.trim() || !editOrderProductId.trim()) {
-      setMessage("Customer and product are required.");
+      setMessage("Customer and product are required. Please select both before updating the order.");
       return;
     }
 
     if (!editOrderQuantity || !isValidPositiveNumber(editOrderQuantity)) {
-      setMessage("Quantity must be a valid number greater than 0.");
+      setMessage("Quantity must be a valid number greater than 0. Example: 1");
       return;
     }
 
@@ -1558,7 +1562,7 @@ export default function HishabiDashboard() {
       }
     } catch (error) {
       console.error("Failed to update order:", error);
-      setMessage("Something went wrong while updating order.");
+      setMessage(getConnectionErrorMessage("update order"));
     } finally {
       setEditOrderSubmitting(false);
     }
@@ -1604,7 +1608,7 @@ export default function HishabiDashboard() {
       }
     } catch (error) {
       console.error("Failed to update order status:", error);
-      setMessage("Something went wrong while updating order status.");
+      setMessage(getConnectionErrorMessage("update order status"));
     }
   }
 
@@ -1624,7 +1628,7 @@ export default function HishabiDashboard() {
       setOrderDetail(result?.data || null);
     } catch (error) {
       console.error("Failed to load order detail:", error);
-      setMessage("Something went wrong while loading order detail.");
+      setMessage(getConnectionErrorMessage("load order detail"));
     } finally {
       setOrderDetailLoading(false);
     }
@@ -1641,12 +1645,12 @@ export default function HishabiDashboard() {
     const trimmedSellerId = planSellerId.trim();
 
     if (!trimmedSellerId) {
-      setMessage("Please enter a seller ID first.");
+      setMessage("Please enter or apply a Seller ID first.");
       return;
     }
 
     if (!isPlanSellerLoaded()) {
-      setMessage("Please load a valid seller before changing plan.");
+      setMessage("Please load a valid seller before changing plan. Go to Seller tab, paste Seller ID, and tap Load Seller.");
       return;
     }
 
@@ -1681,7 +1685,7 @@ export default function HishabiDashboard() {
       await fetchSellerPlan(trimmedSellerId);
     } catch (error) {
       console.error("Failed to update seller plan:", error);
-      setMessage("Something went wrong while updating seller plan.");
+      setMessage(getConnectionErrorMessage("update seller plan"));
     } finally {
       setPlanUpdating(false);
     }
