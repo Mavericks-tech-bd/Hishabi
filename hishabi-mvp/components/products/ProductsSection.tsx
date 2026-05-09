@@ -243,7 +243,7 @@ export default function ProductsSection({
 
             <section className="mb-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
               <h2 className="text-lg font-bold text-slate-900">
-                Filter Products by Seller
+                Find Products
               </h2>
 
               <div className="mt-4 flex flex-col gap-3 md:flex-row">
@@ -279,7 +279,7 @@ export default function ProductsSection({
               <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                 <div>
                   <h2 className="text-lg font-bold text-slate-900">
-                    Search Products
+                    Search Product Name
                   </h2>
 
                   <p className="mt-1 text-sm text-slate-500">
@@ -288,7 +288,7 @@ export default function ProductsSection({
                 </div>
 
                 <p className="text-sm font-semibold text-slate-600">
-                  Showing {getVisibleProducts().length} of {products.length}
+                  Showing {getVisibleProducts().length} of {products.length} products
                 </p>
               </div>
 

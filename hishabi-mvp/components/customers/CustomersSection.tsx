@@ -305,7 +305,7 @@ export default function CustomersSection({ sectionProps }: SectionProps) {
 
             <section className="mb-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
               <h2 className="text-lg font-bold text-slate-900">
-                Filter Customers by Seller
+                Find Customers
               </h2>
 
               <div className="mt-4 flex flex-col gap-3 md:flex-row">
@@ -343,7 +343,7 @@ export default function CustomersSection({ sectionProps }: SectionProps) {
               <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                 <div>
                   <h2 className="text-lg font-bold text-slate-900">
-                    Search Customers
+                    Search Customer Name or Phone
                   </h2>
 
                   <p className="mt-1 text-sm text-slate-500">
@@ -352,7 +352,7 @@ export default function CustomersSection({ sectionProps }: SectionProps) {
                 </div>
 
                 <p className="text-sm font-semibold text-slate-600">
-                  Showing {getVisibleCustomers().length} of {customers.length}
+                  Showing {getVisibleCustomers().length} of {customers.length} customers
                 </p>
               </div>
 

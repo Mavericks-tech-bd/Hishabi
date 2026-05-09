@@ -255,7 +255,7 @@ export default function OrdersSection({ sectionProps }: SectionProps) {
                           setOrderAvailableCustomers([]);
                           setOrderAvailableProducts([]);
                         }}
-                        placeholder="Paste seller ID"
+                        placeholder="Paste seller ID to filter orders"
                         className="flex-1 rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-900"
                       />
 
@@ -388,7 +388,7 @@ export default function OrdersSection({ sectionProps }: SectionProps) {
 
             <section className="mb-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
               <h2 className="text-lg font-bold text-slate-900">
-                Filter Orders by Seller
+                Find Orders
               </h2>
 
               <div className="mt-4 flex flex-col gap-3 md:flex-row">
@@ -426,7 +426,7 @@ export default function OrdersSection({ sectionProps }: SectionProps) {
                   onChange={(event) =>
                     setOrderStatusFilter(event.target.value as OrderStatus | "all")
                   }
-                  className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 outline-none transition focus:border-slate-900"
+                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 outline-none transition focus:border-slate-900 md:w-auto"
                   aria-label="Filter by status"
                 >
                   <option value="all">All statuses</option>
