@@ -1,19 +1,105 @@
-# Python backend
-hishabi-backend/venv/
-hishabi-backend/.env
-hishabi-backend/__pycache__/
-hishabi-backend/*.pyc
+# ============================================
+# Hishabi AI — Root .gitignore
+# ============================================
 
-# Next.js frontend
+# --- Python backend ---
+hishabi-backend/venv/
+hishabi-backend/.venv/
+hishabi-backend/env/
+hishabi-backend/__pycache__/
+hishabi-backend/**/__pycache__/
+hishabi-backend/*.pyc
+hishabi-backend/*.pyo
+hishabi-backend/*.pyd
+hishabi-backend/.pytest_cache/
+hishabi-backend/.mypy_cache/
+hishabi-backend/.ruff_cache/
+hishabi-backend/.coverage
+hishabi-backend/htmlcov/
+hishabi-backend/dist/
+hishabi-backend/build/
+hishabi-backend/*.egg-info/
+
+# --- Next.js frontend ---
 hishabi-mvp/node_modules/
 hishabi-mvp/.next/
-hishabi-mvp/.env.local
-hishabi-mvp/.env
+hishabi-mvp/out/
+hishabi-mvp/build/
+hishabi-mvp/dist/
+hishabi-mvp/.turbo/
+hishabi-mvp/.swc/
+hishabi-mvp/tsconfig.tsbuildinfo
+hishabi-mvp/next-env.d.ts
 
-# System files
+# --- Environment files (ALL variants) ---
+.env
+.env.*
+!.env.example
+!.env.*.example
+*/.env
+*/.env.*
+!*/.env.example
+!*/.env.*.example
+
+# --- Secrets & credentials ---
+*.pem
+*.key
+*.crt
+*.cert
+*.p12
+*.pfx
+credentials.json
+service-account*.json
+secrets/
+.secrets/
+
+# --- Editor / IDE configs ---
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.shared.json
+.idea/
+*.swp
+*.swo
+*.swn
+*.bak
+*.backup
+*~
+
+# --- AI editor configs ---
+.cursor/
+.cursorrules
+.windsurf/
+.aider*
+.continue/
+
+# --- OS / System files ---
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 __MACOSX/
+desktop.ini
 
-# Logs
+# --- Logs ---
 *.log
+logs/
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# --- Test / coverage ---
+coverage/
+*.lcov
+.nyc_output/
+
+# --- Misc ---
+*.tgz
+*.tar.gz
+.cache/
+tmp/
+temp/
