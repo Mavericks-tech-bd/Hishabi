@@ -1,4 +1,5 @@
-from fastapi import FastAPI, HTTPException, UploadFile, File
+from fastapi import FastAPI, HTTPException, UploadFile, File, Depends
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
@@ -28,6 +29,19 @@ supabase = create_client(
 )
 
 
+
+security = HTTPBearer()
+
+def get_current_seller(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    token = credentials.credentials
+    try:
+        user_response = supabase.auth.get_user(token)
+        if not user_response or not user_response.user:
+            raise HTTPException(status_code=401, detail="Invalid token")
+        return user_response.user.id
+    except Exception as e:
+        raise HTTPException(status_code=401, detail=str(e))
+
 # ==========================================================
 # Constants
 # ==========================================================
@@ -48,7 +62,7 @@ ALLOWED_PLANS = ["free", "starter", "max"]
 # ==========================================================
 
 class ProductCreate(BaseModel):
-    seller_id: str
+    seller_id: str | None = None
     name: str
     price: float
     image_url: str | None = None
@@ -61,7 +75,7 @@ class ProductUpdate(BaseModel):
 
 
 class CustomerCreate(BaseModel):
-    seller_id: str
+    seller_id: str | None = None
     name: str
     phone: str | None = None
     address: str | None = None
@@ -78,7 +92,7 @@ class CustomerUpdate(BaseModel):
 
 
 class OrderCreate(BaseModel):
-    seller_id: str
+    seller_id: str | None = None
     customer_id: str
     product_id: str
     quantity: int = 1
@@ -229,7 +243,7 @@ def get_seller_or_404(seller_id: str):
     return response.data[0]
 
 
-def get_product_or_404(product_id: str):
+def get_product_or_404(product_id: str, expected_seller_id: str = None):
     cleaned_product_id = validate_uuid_id(product_id, "Product ID")
 
     response = (
@@ -241,15 +255,14 @@ def get_product_or_404(product_id: str):
     )
 
     if not response.data:
-        raise HTTPException(
-            status_code=404,
-            detail="Product not found. Please check the product ID.",
-        )
+        raise HTTPException(status_code=404, detail="Product not found.")
+    product = response.data[0]
+    if expected_seller_id and product.get('seller_id') != expected_seller_id:
+        raise HTTPException(status_code=403, detail="Forbidden")
+    return product
 
-    return response.data[0]
 
-
-def get_customer_or_404(customer_id: str):
+def get_customer_or_404(customer_id: str, expected_seller_id: str = None):
     cleaned_customer_id = validate_uuid_id(customer_id, "Customer ID")
 
     response = (
@@ -261,15 +274,14 @@ def get_customer_or_404(customer_id: str):
     )
 
     if not response.data:
-        raise HTTPException(
-            status_code=404,
-            detail="Customer not found. Please check the customer ID.",
-        )
+        raise HTTPException(status_code=404, detail="Customer not found.")
+    customer = response.data[0]
+    if expected_seller_id and customer.get('seller_id') != expected_seller_id:
+        raise HTTPException(status_code=403, detail="Forbidden")
+    return customer
 
-    return response.data[0]
 
-
-def get_order_or_404(order_id: str):
+def get_order_or_404(order_id: str, expected_seller_id: str = None):
     cleaned_order_id = validate_uuid_id(order_id, "Order ID")
 
     response = (
@@ -281,12 +293,11 @@ def get_order_or_404(order_id: str):
     )
 
     if not response.data:
-        raise HTTPException(
-            status_code=404,
-            detail="Order not found. Please check the order ID.",
-        )
-
-    return response.data[0]
+        raise HTTPException(status_code=404, detail="Order not found.")
+    order = response.data[0]
+    if expected_seller_id and order.get('seller_id') != expected_seller_id:
+        raise HTTPException(status_code=403, detail="Forbidden")
+    return order
 
 
 def validate_customer_belongs_to_seller(customer, seller_id: str):
@@ -314,10 +325,6 @@ def root():
     return {"message": "Hishabi API is running"}
 
 
-@app.get("/test-db")
-def test_db():
-    response = supabase.table("sellers").select("*").execute()
-    return {"data": response.data}
 
 
 # ==========================================================
@@ -325,7 +332,9 @@ def test_db():
 # ==========================================================
 
 @app.get("/sellers/{seller_id}/plan")
-def get_seller_plan(seller_id: str):
+def get_seller_plan(seller_id: str, current_seller_id: str = Depends(get_current_seller)):
+    if seller_id != current_seller_id:
+        raise HTTPException(status_code=403, detail="Forbidden")
     seller = get_seller_or_404(seller_id)
 
     seller_id = seller["id"]
@@ -367,7 +376,7 @@ def get_seller_plan(seller_id: str):
 
 
 @app.put("/sellers/{seller_id}/plan")
-def update_seller_plan(seller_id: str, plan_update: SellerPlanUpdate):
+def update_seller_plan(seller_id: str, plan_update: SellerPlanUpdate, current_seller_id: str = Depends(get_current_seller)):
     selected_plan = clean_text(plan_update.plan)
 
     if selected_plan not in ALLOWED_PLANS:
@@ -376,6 +385,8 @@ def update_seller_plan(seller_id: str, plan_update: SellerPlanUpdate):
             detail="Invalid plan. Allowed plans are: free, starter, max.",
         )
 
+    if seller_id != current_seller_id:
+        raise HTTPException(status_code=403, detail="Forbidden")
     seller = get_seller_or_404(seller_id)
 
     if selected_plan == "free":
@@ -409,14 +420,10 @@ def update_seller_plan(seller_id: str, plan_update: SellerPlanUpdate):
 # ==========================================================
 
 @app.get("/products")
-def get_products(seller_id: str | None = None):
+def get_products(current_seller_id: str = Depends(get_current_seller)):
     query = supabase.table("products").select("*")
 
-    cleaned_seller_id = clean_text(seller_id)
-
-    if cleaned_seller_id:
-        get_seller_or_404(cleaned_seller_id)
-        query = query.eq("seller_id", cleaned_seller_id)
+    query = query.eq("seller_id", current_seller_id)
 
     response = query.execute()
 
@@ -424,14 +431,14 @@ def get_products(seller_id: str | None = None):
 
 
 @app.get("/products/{product_id}")
-def get_product_detail(product_id: str):
-    product = get_product_or_404(product_id)
+def get_product_detail(product_id: str, current_seller_id: str = Depends(get_current_seller)):
+    product = get_product_or_404(product_id, current_seller_id)
     return {"data": product}
 
 
 @app.get("/products/{product_id}/images")
-def get_product_images(product_id: str):
-    product = get_product_or_404(product_id)
+def get_product_images(product_id: str, current_seller_id: str = Depends(get_current_seller)):
+    product = get_product_or_404(product_id, current_seller_id)
 
     response = (
         supabase
@@ -448,8 +455,9 @@ def get_product_images(product_id: str):
 async def upload_product_images(
     product_id: str,
     files: list[UploadFile] = File(...),
+    current_seller_id: str = Depends(get_current_seller),
 ):
-    product = get_product_or_404(product_id)
+    product = get_product_or_404(product_id, current_seller_id)
 
     seller_id = product["seller_id"]
     seller = get_seller_or_404(seller_id)
@@ -556,7 +564,7 @@ async def upload_product_images(
 
 
 @app.delete("/product-images/{image_id}")
-def delete_product_image(image_id: str):
+def delete_product_image(image_id: str, current_seller_id: str = Depends(get_current_seller)):
     cleaned_image_id = validate_uuid_id(image_id, "Image ID")
 
     image_response = (
@@ -621,8 +629,8 @@ def delete_product_image(image_id: str):
 
 
 @app.post("/products")
-def create_product(product: ProductCreate):
-    seller_id = validate_uuid_id(product.seller_id, "Seller ID")
+def create_product(product: ProductCreate, current_seller_id: str = Depends(get_current_seller)):
+    seller_id = current_seller_id
     product_name = validate_required_text(product.name, "Product name")
     product_price = validate_price(product.price)
 
@@ -706,8 +714,8 @@ def create_product(product: ProductCreate):
 
 
 @app.put("/products/{product_id}")
-def update_product(product_id: str, product: ProductUpdate):
-    existing_product = get_product_or_404(product_id)
+def update_product(product_id: str, product: ProductUpdate, current_seller_id: str = Depends(get_current_seller)):
+    existing_product = get_product_or_404(product_id, current_seller_id)
 
     update_data = {}
 
@@ -741,8 +749,8 @@ def update_product(product_id: str, product: ProductUpdate):
 
 
 @app.delete("/products/{product_id}")
-def delete_product(product_id: str):
-    product = get_product_or_404(product_id)
+def delete_product(product_id: str, current_seller_id: str = Depends(get_current_seller)):
+    product = get_product_or_404(product_id, current_seller_id)
 
     response = (
         supabase
@@ -760,14 +768,10 @@ def delete_product(product_id: str):
 # ==========================================================
 
 @app.get("/customers")
-def get_customers(seller_id: str | None = None):
+def get_customers(current_seller_id: str = Depends(get_current_seller)):
     query = supabase.table("customers").select("*")
 
-    cleaned_seller_id = clean_text(seller_id)
-
-    if cleaned_seller_id:
-        get_seller_or_404(cleaned_seller_id)
-        query = query.eq("seller_id", cleaned_seller_id)
+    query = query.eq("seller_id", current_seller_id)
 
     response = query.execute()
 
@@ -775,14 +779,14 @@ def get_customers(seller_id: str | None = None):
 
 
 @app.get("/customers/{customer_id}")
-def get_customer_detail(customer_id: str):
-    customer = get_customer_or_404(customer_id)
+def get_customer_detail(customer_id: str, current_seller_id: str = Depends(get_current_seller)):
+    customer = get_customer_or_404(customer_id, current_seller_id)
     return {"data": customer}
 
 
 @app.post("/customers")
-def create_customer(customer: CustomerCreate):
-    seller_id = validate_uuid_id(customer.seller_id, "Seller ID")
+def create_customer(customer: CustomerCreate, current_seller_id: str = Depends(get_current_seller)):
+    seller_id = current_seller_id
     customer_name = validate_required_text(customer.name, "Customer name")
 
     get_seller_or_404(seller_id)
@@ -807,8 +811,8 @@ def create_customer(customer: CustomerCreate):
 
 
 @app.put("/customers/{customer_id}")
-def update_customer(customer_id: str, customer: CustomerUpdate):
-    existing_customer = get_customer_or_404(customer_id)
+def update_customer(customer_id: str, customer: CustomerUpdate, current_seller_id: str = Depends(get_current_seller)):
+    existing_customer = get_customer_or_404(customer_id, current_seller_id)
 
     update_data = {}
 
@@ -850,8 +854,8 @@ def update_customer(customer_id: str, customer: CustomerUpdate):
 
 
 @app.delete("/customers/{customer_id}")
-def delete_customer(customer_id: str):
-    customer = get_customer_or_404(customer_id)
+def delete_customer(customer_id: str, current_seller_id: str = Depends(get_current_seller)):
+    customer = get_customer_or_404(customer_id, current_seller_id)
 
     response = (
         supabase
@@ -869,14 +873,10 @@ def delete_customer(customer_id: str):
 # ==========================================================
 
 @app.get("/orders")
-def get_orders(seller_id: str | None = None):
+def get_orders(current_seller_id: str = Depends(get_current_seller)):
     query = supabase.table("orders").select("*")
 
-    cleaned_seller_id = clean_text(seller_id)
-
-    if cleaned_seller_id:
-        get_seller_or_404(cleaned_seller_id)
-        query = query.eq("seller_id", cleaned_seller_id)
+    query = query.eq("seller_id", current_seller_id)
 
     response = query.execute()
 
@@ -884,8 +884,8 @@ def get_orders(seller_id: str | None = None):
 
 
 @app.get("/orders/{order_id}")
-def get_order_detail(order_id: str):
-    order = get_order_or_404(order_id)
+def get_order_detail(order_id: str, current_seller_id: str = Depends(get_current_seller)):
+    order = get_order_or_404(order_id, current_seller_id)
 
     customer_response = (
         supabase
@@ -926,8 +926,8 @@ def get_order_detail(order_id: str):
 
 
 @app.post("/orders")
-def create_order(order: OrderCreate):
-    seller_id = validate_uuid_id(order.seller_id, "Seller ID")
+def create_order(order: OrderCreate, current_seller_id: str = Depends(get_current_seller)):
+    seller_id = current_seller_id
     customer_id = validate_uuid_id(order.customer_id, "Customer ID")
     product_id = validate_uuid_id(order.product_id, "Product ID")
     quantity = validate_quantity(order.quantity)
@@ -935,8 +935,8 @@ def create_order(order: OrderCreate):
 
     get_seller_or_404(seller_id)
 
-    customer = get_customer_or_404(customer_id)
-    product = get_product_or_404(product_id)
+    customer = get_customer_or_404(customer_id, current_seller_id)
+    product = get_product_or_404(product_id, current_seller_id)
 
     validate_customer_belongs_to_seller(customer, seller_id)
     validate_product_belongs_to_seller(product, seller_id)
@@ -964,21 +964,21 @@ def create_order(order: OrderCreate):
 
 
 @app.put("/orders/{order_id}")
-def update_order(order_id: str, order: OrderUpdate):
-    existing_order = get_order_or_404(order_id)
+def update_order(order_id: str, order: OrderUpdate, current_seller_id: str = Depends(get_current_seller)):
+    existing_order = get_order_or_404(order_id, current_seller_id)
 
     seller_id = existing_order["seller_id"]
     update_data = {}
 
     if order.customer_id is not None:
         customer_id = validate_uuid_id(order.customer_id, "Customer ID")
-        customer = get_customer_or_404(customer_id)
+        customer = get_customer_or_404(customer_id, current_seller_id)
         validate_customer_belongs_to_seller(customer, seller_id)
         update_data["customer_id"] = customer_id
 
     if order.product_id is not None:
         product_id = validate_uuid_id(order.product_id, "Product ID")
-        product = get_product_or_404(product_id)
+        product = get_product_or_404(product_id, current_seller_id)
         validate_product_belongs_to_seller(product, seller_id)
         update_data["product_id"] = product_id
 
@@ -1004,7 +1004,7 @@ def update_order(order_id: str, order: OrderUpdate):
             existing_order["quantity"],
         )
 
-        product_for_total = get_product_or_404(product_id_for_total)
+        product_for_total = get_product_or_404(product_id_for_total, current_seller_id)
         validate_product_belongs_to_seller(product_for_total, seller_id)
 
         product_price = float(product_for_total["price"])
@@ -1022,8 +1022,8 @@ def update_order(order_id: str, order: OrderUpdate):
 
 
 @app.delete("/orders/{order_id}")
-def delete_order(order_id: str):
-    order = get_order_or_404(order_id)
+def delete_order(order_id: str, current_seller_id: str = Depends(get_current_seller)):
+    order = get_order_or_404(order_id, current_seller_id)
 
     response = (
         supabase
@@ -1041,18 +1041,14 @@ def delete_order(order_id: str):
 # ==========================================================
 
 @app.get("/dashboard/summary")
-def get_dashboard_summary(seller_id: str | None = None):
+def get_dashboard_summary(current_seller_id: str = Depends(get_current_seller)):
     products_query = supabase.table("products").select("id")
     customers_query = supabase.table("customers").select("id")
     orders_query = supabase.table("orders").select("id, total, status")
 
-    cleaned_seller_id = clean_text(seller_id)
-
-    if cleaned_seller_id:
-        get_seller_or_404(cleaned_seller_id)
-        products_query = products_query.eq("seller_id", cleaned_seller_id)
-        customers_query = customers_query.eq("seller_id", cleaned_seller_id)
-        orders_query = orders_query.eq("seller_id", cleaned_seller_id)
+    products_query = products_query.eq("seller_id", current_seller_id)
+    customers_query = customers_query.eq("seller_id", current_seller_id)
+    orders_query = orders_query.eq("seller_id", current_seller_id)
 
     products_response = products_query.execute()
     customers_response = customers_query.execute()
