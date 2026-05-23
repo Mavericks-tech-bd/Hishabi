@@ -1,4 +1,7 @@
-export const API_BASE_URL = "http://127.0.0.1:8003";
+import { createClient } from "@/utils/supabase/client";
+
+export const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8003";
 
 export function apiUrl(path: string) {
   if (path.startsWith("http://") || path.startsWith("https://")) {
@@ -96,7 +99,20 @@ export async function apiRequest<T>(
   options?: RequestInit,
   fallbackErrorMessage = "Request failed"
 ): Promise<T> {
-  const response = await fetch(apiUrl(path), options);
+  const supabase = createClient();
+  const { data: { session } } = await supabase.auth.getSession();
+  
+  const headers = new Headers(options?.headers);
+  if (session?.access_token) {
+    headers.set('Authorization', `Bearer ${session.access_token}`);
+  }
+
+  const finalOptions = {
+    ...options,
+    headers
+  };
+
+  const response = await fetch(apiUrl(path), finalOptions);
   const result = await safeJson(response);
 
   if (!response.ok) {
