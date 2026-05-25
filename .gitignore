@@ -71,6 +71,9 @@ secrets/
 .windsurf/
 .aider*
 .continue/
+.claude/
+CLAUDE.md
+CLAUDE.local.md
 
 # --- OS / System files ---
 .DS_Store
