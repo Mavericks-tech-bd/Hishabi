@@ -22,15 +22,12 @@ This checkpoint freezes the current stable local MVP before larger future phases
 - Product create, read, update, delete.
 - Seller-wise product filtering.
 - Product search.
-- Plan-based product limits:
-  - Free: 10 products
-  - Starter: 50 products
-  - Max: unlimited products
+- No product limit on any plan (locked 5-tier pricing).
 - Product image upload during product creation.
 - Plan-based image limits:
   - Free: 3 images per product
   - Starter: 10 images per product
-  - Max: 10 images per product
+  - Growth / Pro / Business: unlimited images per product
 - Product image gallery in product cards.
 - Individual product image delete.
 - Main/hero product image refreshes after image delete.
@@ -68,10 +65,12 @@ This checkpoint freezes the current stable local MVP before larger future phases
 - Seller plan load.
 - Plan change for MVP/admin testing.
 - Product and image limits visible by plan.
-- Plan options:
+- Plan options (LOCKED 5-tier):
   - Free
   - Starter
-  - Max
+  - Growth
+  - Pro
+  - Business
 
 ### Frontend UX
 - Mobile-first layout.

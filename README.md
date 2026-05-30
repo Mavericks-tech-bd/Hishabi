@@ -19,14 +19,11 @@ The current MVP is the seller dashboard and control center. It helps sellers man
 - Product image gallery.
 - Delete individual product images.
 - Main product image refreshes after image delete.
-- Plan product limits:
-  - Free: 10 products
-  - Starter: 50 products
-  - Max: unlimited products
+- No product limit on any plan (5-tier pricing: Free / Starter / Growth / Pro / Business).
 - Plan image limits:
   - Free: 3 images per product
   - Starter: 10 images per product
-  - Max: 10 images per product
+  - Growth / Pro / Business: unlimited images per product
 
 ### Customers
 - Customer create, read, update, delete.
