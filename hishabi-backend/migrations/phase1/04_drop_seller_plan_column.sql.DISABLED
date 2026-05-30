@@ -1,0 +1,73 @@
+-- Migration 04: drop sellers.plan enum, replace with subscription-based view
+-- Why: sellers.plan was a 3-tier enum (free/starter/max). Phase 1 model has
+-- plans as DATA in plans table + active subscriptions. The denormalized column
+-- on sellers becomes stale and confusing — drop it. Backend reads plan via
+-- subscriptions JOIN or v_seller_active_plan view.
+-- What: backfill existing sellers with 'free' subscription, drop plan column,
+-- expose view.
+--
+-- !!! DISABLED 2026-05-28 !!!
+-- File renamed to .DISABLED to prevent accidental apply. DO NOT APPLY until
+-- backend main.py is refactored to read plan from v_seller_active_plan view.
+-- Applying now will crash /sellers, /products, /dashboard endpoints that call
+-- seller.get("plan").
+--
+-- Apply order:
+--   1. Apply 03_plans_subscriptions.sql (creates plans + subscriptions).
+--   2. Backfill existing sellers into subscriptions (the INSERT below — can
+--      be run standalone, safe, idempotent).
+--   3. Refactor backend main.py to read plan from view with fallback.
+--   4. Test all CRUD endpoints in Swagger one by one.
+--   5. Frontend updated to handle new plan IDs.
+--   6. ONLY THEN rename back to .sql and apply DROP COLUMN.
+
+BEGIN;
+
+-- Backfill: every existing seller without a subscription gets Free plan,
+-- active for 100 years (placeholder — they'll upgrade or never use).
+INSERT INTO public.subscriptions (seller_id, plan_id, status, period_start, period_end)
+SELECT s.id, 'free', 'active', now(), now() + interval '100 years'
+FROM public.sellers s
+LEFT JOIN public.subscriptions sub
+  ON sub.seller_id = s.id AND sub.status = 'active'
+WHERE sub.id IS NULL;
+
+-- Drop the old plan column + product_limit (replaced by plans.features or limits).
+ALTER TABLE public.sellers DROP COLUMN IF EXISTS plan;
+ALTER TABLE public.sellers DROP COLUMN IF EXISTS product_limit;
+
+-- Drop the old enum type if not referenced elsewhere.
+DO $$ BEGIN
+  DROP TYPE IF EXISTS public.plan_tier;
+EXCEPTION WHEN dependent_objects_still_exist THEN
+  RAISE NOTICE 'plan_tier type still referenced, leaving in place';
+END $$;
+
+-- Convenience view: seller -> active plan details (single source of truth).
+CREATE OR REPLACE VIEW public.v_seller_active_plan AS
+SELECT
+  s.id                       AS seller_id,
+  s.name                     AS seller_name,
+  p.id                       AS plan_id,
+  p.name                     AS plan_name,
+  p.price_bdt,
+  p.conversations_limit,
+  p.token_budget_per_conv,
+  p.per_day_conv_cap,
+  p.pages_limit,
+  p.image_limit_per_product,
+  p.sale_fee_pct,
+  sub.period_start,
+  sub.period_end,
+  sub.status                 AS subscription_status,
+  sub.id                     AS subscription_id
+FROM public.sellers s
+LEFT JOIN public.subscriptions sub
+  ON sub.seller_id = s.id AND sub.status = 'active'
+LEFT JOIN public.plans p
+  ON p.id = sub.plan_id;
+
+-- View inherits RLS from underlying tables (sellers + subscriptions).
+GRANT SELECT ON public.v_seller_active_plan TO authenticated;
+
+COMMIT;
