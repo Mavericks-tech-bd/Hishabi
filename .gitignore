@@ -74,6 +74,9 @@ secrets/
 .claude/
 CLAUDE.md
 CLAUDE.local.md
+CLAUDEai.md
+admin.md
+ADMIN.md
 
 # --- OS / System files ---
 .DS_Store

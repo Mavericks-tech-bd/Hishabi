@@ -54,7 +54,16 @@ ALLOWED_ORDER_STATUSES = [
     "cancelled",
 ]
 
-ALLOWED_PLANS = ["free", "starter", "max"]
+ALLOWED_PLANS = ["free", "starter", "growth", "pro", "business"]
+
+
+def normalize_plan(plan: str | None) -> str:
+    if not plan:
+        return "free"
+    plan = plan.lower()
+    if plan not in ALLOWED_PLANS:
+        return "free"
+    return plan
 
 
 # ==========================================================
@@ -217,10 +226,14 @@ def validate_order_status(status: str | None) -> str:
 
 
 def get_product_image_limit(plan: str):
-    if plan == "free":
-        return 3
-
-    return 10
+    limits = {
+        "free": 3,
+        "starter": 10,
+        "growth": None,
+        "pro": None,
+        "business": None,
+    }
+    return limits.get(plan, 3)
 
 
 def get_seller_or_404(seller_id: str):
@@ -349,18 +362,7 @@ def get_seller_plan(seller_id: str, current_seller_id: str = Depends(get_current
 
     current_product_count = len(products_response.data or [])
 
-    plan = seller.get("plan") or "free"
-    product_limit = seller.get("product_limit")
-
-    if plan == "max":
-        product_limit_display = "unlimited"
-        remaining_products = "unlimited"
-    else:
-        if product_limit is None:
-            product_limit = 50 if plan == "starter" else 10
-
-        product_limit_display = product_limit
-        remaining_products = max(product_limit - current_product_count, 0)
+    plan = normalize_plan(seller.get("plan"))
 
     return {
         "data": {
@@ -368,9 +370,9 @@ def get_seller_plan(seller_id: str, current_seller_id: str = Depends(get_current
             "name": seller.get("name"),
             "phone": seller.get("phone"),
             "plan": plan,
-            "product_limit": product_limit_display,
+            "product_limit": "unlimited",
             "current_product_count": current_product_count,
-            "remaining_products": remaining_products,
+            "remaining_products": "unlimited",
         }
     }
 
@@ -382,29 +384,17 @@ def update_seller_plan(seller_id: str, plan_update: SellerPlanUpdate, current_se
     if selected_plan not in ALLOWED_PLANS:
         raise HTTPException(
             status_code=400,
-            detail="Invalid plan. Allowed plans are: free, starter, max.",
+            detail=f"Invalid plan. Allowed plans are: {', '.join(ALLOWED_PLANS)}.",
         )
 
     if seller_id != current_seller_id:
         raise HTTPException(status_code=403, detail="Forbidden")
     seller = get_seller_or_404(seller_id)
 
-    if selected_plan == "free":
-        product_limit = 10
-    elif selected_plan == "starter":
-        product_limit = 50
-    else:
-        product_limit = None
-
     response = (
         supabase
         .table("sellers")
-        .update(
-            {
-                "plan": selected_plan,
-                "product_limit": product_limit,
-            }
-        )
+        .update({"plan": selected_plan})
         .eq("id", seller["id"])
         .execute()
     )
@@ -482,17 +472,18 @@ async def upload_product_images(
     current_image_count = len(existing_images_response.data or [])
     new_image_count = len(files)
 
-    if current_image_count + new_image_count > image_limit:
+    if image_limit is not None and current_image_count + new_image_count > image_limit:
         raise HTTPException(
             status_code=403,
             detail={
                 "message": (
                     f"You cannot upload more than {image_limit} images "
-                    "for one product according to your plan."
+                    "for one product on your current plan."
                 ),
                 "upgrade_message": (
                     "Free plan allows 3 images per product. "
-                    "Starter and Max plans allow 10 images per product."
+                    "Starter plan allows 10 images per product. "
+                    "Growth, Pro, and Business plans have unlimited images per product."
                 ),
                 "current_image_count": current_image_count,
                 "trying_to_upload": new_image_count,
@@ -634,67 +625,7 @@ def create_product(product: ProductCreate, current_seller_id: str = Depends(get_
     product_name = validate_required_text(product.name, "Product name")
     product_price = validate_price(product.price)
 
-    seller = get_seller_or_404(seller_id)
-
-    current_plan = seller.get("plan") or "free"
-    product_limit = seller.get("product_limit")
-
-    products_response = (
-        supabase
-        .table("products")
-        .select("id")
-        .eq("seller_id", seller_id)
-        .execute()
-    )
-
-    current_product_count = len(products_response.data or [])
-
-    if current_plan == "max":
-        response = (
-            supabase
-            .table("products")
-            .insert(
-                {
-                    "seller_id": seller_id,
-                    "name": product_name,
-                    "price": product_price,
-                    "image_url": product.image_url,
-                }
-            )
-            .execute()
-        )
-
-        return {"data": response.data}
-
-    if product_limit is None:
-        if current_plan == "starter":
-            product_limit = 50
-        else:
-            product_limit = 10
-
-    if current_product_count >= product_limit:
-        if current_plan == "free":
-            upgrade_message = (
-                "Upgrade to the 99 taka Starter package to add up to 50 products, "
-                "or choose the 500 taka Max package for unlimited products."
-            )
-        elif current_plan == "starter":
-            upgrade_message = (
-                "Upgrade to the 500 taka Max package to add unlimited products."
-            )
-        else:
-            upgrade_message = "Upgrade your plan to add more products."
-
-        raise HTTPException(
-            status_code=403,
-            detail={
-                "message": f"Your current plan allows {product_limit} products only.",
-                "upgrade_message": upgrade_message,
-                "current_product_count": current_product_count,
-                "product_limit": product_limit,
-                "current_plan": current_plan,
-            },
-        )
+    get_seller_or_404(seller_id)
 
     response = (
         supabase
