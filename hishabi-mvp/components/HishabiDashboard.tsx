@@ -8,7 +8,7 @@ import PlanSection from "@/components/plan/PlanSection";
 import ProductsSection from "@/components/products/ProductsSection";
 import CustomersSection from "@/components/customers/CustomersSection";
 import OrdersSection from "@/components/orders/OrdersSection";
-import { API_BASE_URL, getApiErrorMessage, safeJson } from "@/lib/api";
+import { API_BASE_URL, authFetch, getApiErrorMessage, safeJson } from "@/lib/api";
 import type {
   ActiveSection,
   Customer,
@@ -34,30 +34,52 @@ const PLAN_OPTIONS = [
     id: "free",
     name: "Free",
     price: "0 taka",
-    productLimit: "10 products",
+    productLimit: "Unlimited products",
     imageLimit: "3 images per product",
-    description: "Good for testing the MVP with a small product catalog.",
+    description: "Try Hishabi free. 30 conversations/month, 1 page.",
   },
   {
     id: "starter",
     name: "Starter",
-    price: "99 taka",
-    productLimit: "50 products",
-    imageLimit: "10 images per product",
-    description: "Better for small sellers who need more products and images.",
-  },
-  {
-    id: "max",
-    name: "Max",
-    price: "500 taka",
+    price: "199 taka",
     productLimit: "Unlimited products",
     imageLimit: "10 images per product",
-    description: "Best for sellers who want no product limit.",
+    description: "150 conversations/month, 1 page. Netflix-cheap AI staff.",
+  },
+  {
+    id: "growth",
+    name: "Growth",
+    price: "499 taka",
+    productLimit: "Unlimited products",
+    imageLimit: "Unlimited images per product",
+    description: "600 conversations/month, 2 pages. Most popular.",
+  },
+  {
+    id: "pro",
+    name: "Pro",
+    price: "999 taka",
+    productLimit: "Unlimited products",
+    imageLimit: "Unlimited images per product",
+    description: "1800 conversations/month, 3 pages. Replace 3 staff.",
+  },
+  {
+    id: "business",
+    name: "Business",
+    price: "2499 taka",
+    productLimit: "Unlimited products",
+    imageLimit: "Unlimited images per product",
+    description: "4500 conversations/month, 5 pages. Agency-grade.",
   },
 ];
 
-function getImageLimitByPlan(plan: string) {
-  return plan === "free" ? 3 : 10;
+function getImageLimitByPlan(plan: string): number {
+  if (plan === "free") return 3;
+  if (plan === "starter") return 10;
+  return Infinity;
+}
+
+function formatImageLimit(limit: number): string {
+  return Number.isFinite(limit) ? String(limit) : "Unlimited";
 }
 
 function formatTaka(value?: number | null) {
@@ -252,7 +274,7 @@ export default function HishabiDashboard() {
           )}`
         : `${API_BASE_URL}/products`;
 
-      const response = await fetch(url);
+      const response = await authFetch(url);
       const result = await safeJson(response);
 
       if (!response.ok) {
@@ -282,7 +304,7 @@ export default function HishabiDashboard() {
         [productId]: true,
       }));
 
-      const response = await fetch(
+      const response = await authFetch(
         `${API_BASE_URL}/products/${productId}/images`
       );
       const result = await safeJson(response);
@@ -320,7 +342,7 @@ export default function HishabiDashboard() {
     await Promise.all(
       productsToLoad.map(async (product) => {
         try {
-          const response = await fetch(
+          const response = await authFetch(
             `${API_BASE_URL}/products/${product.id}/images`
           );
           const result = await safeJson(response);
@@ -352,7 +374,7 @@ export default function HishabiDashboard() {
     try {
       setMessage("");
 
-      const response = await fetch(`${API_BASE_URL}/product-images/${imageId}`, {
+      const response = await authFetch(`${API_BASE_URL}/product-images/${imageId}`, {
         method: "DELETE",
       });
       const result = await safeJson(response);
@@ -382,7 +404,7 @@ export default function HishabiDashboard() {
           )}`
         : `${API_BASE_URL}/customers`;
 
-      const response = await fetch(url);
+      const response = await authFetch(url);
       const result = await safeJson(response);
 
       if (!response.ok) {
@@ -412,7 +434,7 @@ export default function HishabiDashboard() {
           )}`
         : `${API_BASE_URL}/orders`;
 
-      const response = await fetch(url);
+      const response = await authFetch(url);
       const result = await safeJson(response);
 
       if (!response.ok) {
@@ -443,7 +465,7 @@ export default function HishabiDashboard() {
           )}`
         : `${API_BASE_URL}/dashboard/summary`;
 
-      const response = await fetch(url);
+      const response = await authFetch(url);
       const result = await safeJson(response);
 
       if (!response.ok) {
@@ -471,7 +493,7 @@ export default function HishabiDashboard() {
     }
 
     try {
-      const response = await fetch(
+      const response = await authFetch(
         `${API_BASE_URL}/sellers/${encodeURIComponent(trimmedSellerId)}/plan`
       );
 
@@ -506,7 +528,7 @@ export default function HishabiDashboard() {
       setPlanLoading(true);
       setMessage("");
 
-      const response = await fetch(
+      const response = await authFetch(
         `${API_BASE_URL}/sellers/${encodeURIComponent(trimmedSellerId)}/plan`
       );
       const result = await safeJson(response);
@@ -544,12 +566,12 @@ export default function HishabiDashboard() {
       setMessage("");
 
       const [customersResponse, productsResponse] = await Promise.all([
-        fetch(
+        authFetch(
           `${API_BASE_URL}/customers?seller_id=${encodeURIComponent(
             trimmedSellerId
           )}`
         ),
-        fetch(
+        authFetch(
           `${API_BASE_URL}/products?seller_id=${encodeURIComponent(
             trimmedSellerId
           )}`
@@ -603,12 +625,12 @@ export default function HishabiDashboard() {
       setMessage("");
 
       const [customersResponse, productsResponse] = await Promise.all([
-        fetch(
+        authFetch(
           `${API_BASE_URL}/customers?seller_id=${encodeURIComponent(
             trimmedSellerId
           )}`
         ),
-        fetch(
+        authFetch(
           `${API_BASE_URL}/products?seller_id=${encodeURIComponent(
             trimmedSellerId
           )}`
@@ -645,7 +667,7 @@ export default function HishabiDashboard() {
       setSellerHelperLoading(true);
       setMessage("");
 
-      const response = await fetch(
+      const response = await authFetch(
         `${API_BASE_URL}/sellers/${encodeURIComponent(trimmedSellerId)}/plan`
       );
 
@@ -735,7 +757,7 @@ export default function HishabiDashboard() {
     }
 
     try {
-      const response = await fetch(
+      const response = await authFetch(
         `${API_BASE_URL}/sellers/${encodeURIComponent(trimmedSellerId)}/plan`
       );
 
@@ -947,7 +969,7 @@ export default function HishabiDashboard() {
     let response: Response;
 
     try {
-      response = await fetch(`${API_BASE_URL}/products/${productId}/images`, {
+      response = await authFetch(`${API_BASE_URL}/products/${productId}/images`, {
         method: "POST",
         body: formData,
       });
@@ -1002,7 +1024,7 @@ export default function HishabiDashboard() {
     try {
       setProductSubmitting(true);
 
-      const productResponse = await fetch(`${API_BASE_URL}/products`, {
+      const productResponse = await authFetch(`${API_BASE_URL}/products`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -1042,7 +1064,7 @@ export default function HishabiDashboard() {
         try {
           await uploadProductImages(newProduct.id);
         } catch (uploadError) {
-          await fetch(`${API_BASE_URL}/products/${newProduct.id}`, {
+          await authFetch(`${API_BASE_URL}/products/${newProduct.id}`, {
             method: "DELETE",
           });
 
@@ -1091,7 +1113,7 @@ export default function HishabiDashboard() {
     try {
       setMessage("");
 
-      const response = await fetch(`${API_BASE_URL}/products/${productId}`, {
+      const response = await authFetch(`${API_BASE_URL}/products/${productId}`, {
         method: "DELETE",
       });
 
@@ -1152,7 +1174,7 @@ export default function HishabiDashboard() {
     try {
       setEditProductSubmitting(true);
 
-      const response = await fetch(`${API_BASE_URL}/products/${productId}`, {
+      const response = await authFetch(`${API_BASE_URL}/products/${productId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -1214,7 +1236,7 @@ export default function HishabiDashboard() {
     try {
       setCustomerSubmitting(true);
 
-      const response = await fetch(`${API_BASE_URL}/customers`, {
+      const response = await authFetch(`${API_BASE_URL}/customers`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -1271,7 +1293,7 @@ export default function HishabiDashboard() {
     try {
       setMessage("");
 
-      const response = await fetch(`${API_BASE_URL}/customers/${customerId}`, {
+      const response = await authFetch(`${API_BASE_URL}/customers/${customerId}`, {
         method: "DELETE",
       });
 
@@ -1333,7 +1355,7 @@ export default function HishabiDashboard() {
     try {
       setEditCustomerSubmitting(true);
 
-      const response = await fetch(`${API_BASE_URL}/customers/${customerId}`, {
+      const response = await authFetch(`${API_BASE_URL}/customers/${customerId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -1409,7 +1431,7 @@ export default function HishabiDashboard() {
     try {
       setOrderSubmitting(true);
 
-      const response = await fetch(`${API_BASE_URL}/orders`, {
+      const response = await authFetch(`${API_BASE_URL}/orders`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -1456,7 +1478,7 @@ export default function HishabiDashboard() {
     try {
       setMessage("");
 
-      const response = await fetch(`${API_BASE_URL}/orders/${orderId}`, {
+      const response = await authFetch(`${API_BASE_URL}/orders/${orderId}`, {
         method: "DELETE",
       });
 
@@ -1531,7 +1553,7 @@ export default function HishabiDashboard() {
     try {
       setEditOrderSubmitting(true);
 
-      const response = await fetch(`${API_BASE_URL}/orders/${orderId}`, {
+      const response = await authFetch(`${API_BASE_URL}/orders/${orderId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -1572,7 +1594,7 @@ export default function HishabiDashboard() {
     setMessage("");
 
     try {
-      const response = await fetch(`${API_BASE_URL}/orders/${order.id}`, {
+      const response = await authFetch(`${API_BASE_URL}/orders/${order.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -1617,7 +1639,7 @@ export default function HishabiDashboard() {
       setOrderDetailLoading(true);
       setMessage("");
 
-      const response = await fetch(`${API_BASE_URL}/orders/${orderId}`);
+      const response = await authFetch(`${API_BASE_URL}/orders/${orderId}`);
       const result = await safeJson(response);
 
       if (!response.ok) {
@@ -1658,7 +1680,7 @@ export default function HishabiDashboard() {
       setPlanUpdating(true);
       setMessage("");
 
-      const response = await fetch(
+      const response = await authFetch(
         `${API_BASE_URL}/sellers/${encodeURIComponent(trimmedSellerId)}/plan`,
         {
           method: "PUT",
@@ -2336,7 +2358,7 @@ export default function HishabiDashboard() {
             fetchPlanForSeller={fetchPlanForSeller}
             handleChangeSellerPlan={handleChangeSellerPlan}
             isPlanSellerLoaded={isPlanSellerLoaded}
-            getImageLimitByPlan={getImageLimitByPlan}
+            getImageLimitByPlan={(plan: string) => formatImageLimit(getImageLimitByPlan(plan))}
             PLAN_OPTIONS={PLAN_OPTIONS}
             shortId={shortId}
             renderCopyButton={renderCopyButton}

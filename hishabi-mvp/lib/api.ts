@@ -94,6 +94,22 @@ export function getApiErrorMessage(result: unknown, fallbackMessage: string) {
   return fallbackMessage;
 }
 
+export async function authFetch(input: string, options?: RequestInit): Promise<Response> {
+  const supabase = createClient();
+  const { data: { session } } = await supabase.auth.getSession();
+
+  const headers = new Headers(options?.headers);
+  if (session?.access_token) {
+    headers.set("Authorization", `Bearer ${session.access_token}`);
+  }
+
+  return fetch(input, {
+    ...options,
+    headers,
+    cache: "no-store",
+  });
+}
+
 export async function apiRequest<T>(
   path: string,
   options?: RequestInit,
@@ -101,15 +117,16 @@ export async function apiRequest<T>(
 ): Promise<T> {
   const supabase = createClient();
   const { data: { session } } = await supabase.auth.getSession();
-  
+
   const headers = new Headers(options?.headers);
   if (session?.access_token) {
     headers.set('Authorization', `Bearer ${session.access_token}`);
   }
 
-  const finalOptions = {
+  const finalOptions: RequestInit = {
     ...options,
-    headers
+    headers,
+    cache: "no-store",
   };
 
   const response = await fetch(apiUrl(path), finalOptions);

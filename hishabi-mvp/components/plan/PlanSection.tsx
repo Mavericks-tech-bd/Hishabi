@@ -10,7 +10,7 @@ type PlanSectionProps = {
   fetchPlanForSeller: (sellerId?: string) => Promise<void>;
   handleChangeSellerPlan: (plan: string) => Promise<void>;
   isPlanSellerLoaded: () => boolean;
-  getImageLimitByPlan: (plan: string) => number;
+  getImageLimitByPlan: (plan: string) => string;
   PLAN_OPTIONS: any[];
   shortId: (value: string) => string;
   renderCopyButton: (value: string, label: string) => React.ReactNode;
